@@ -1,0 +1,67 @@
+﻿
+@using EmployeeDirectory.Core.Data.Context
+@using Microsoft.EntityFrameworkCore
+@using Telerik.Blazor
+@using Telerik.Blazor.Components
+@using Telerik.SvgIcons
+
+
+@* Inject database context for data operations *@
+@inject IDbContextFactory<AppDbContext> DbContextFactory
+
+@* TELERIK BAR CHART - Employee count visualization                       *@
+<TelerikChart>
+    <ChartSeriesItems>
+        @* Bar chart series displaying employee counts by department *@
+        <ChartSeries Type="ChartSeriesType.Bar" 
+                     Data="@employeeCounts" 
+                     Field="EmployeeCount" 
+                     CategoryField="DepartmentName">
+            @* X-axis: department names *@
+        </ChartSeries>
+    </ChartSeriesItems>
+    <ChartTitle Text="Employees by Department"></ChartTitle>              
+    <ChartLegend Position="ChartLegendPosition.Bottom"></ChartLegend>     
+</TelerikChart>
+
+@code {
+    // COMPONENT STATE PROPERTIES
+
+    /// List of employee count data aggregated by department
+    /// Populated during component initialization from database query
+    public List<EmployeeCountModel> employeeCounts { get; set; } = new();
+
+    // DATA MODEL CLASSES
+
+    /// Data model representing employee count for a specific department
+    /// Used as the data source for the Telerik Chart component
+    public class EmployeeCountModel
+    {
+        /// Human-readable department name for chart display
+        /// Used as the category field (X-axis) in the bar chart
+        public string DepartmentName { get; set; }
+
+        /// Number of employees in this department
+        /// Used as the value field (Y-axis) in the bar chart
+        public int EmployeeCount { get; set; }
+    }
+
+    // COMPONENT LIFECYCLE METHODS
+
+    /// Component initialization - loads and aggregates employee data by department
+    /// Executes a complex LINQ query to group employees and join with department names
+    protected override async Task OnInitializedAsync()
+    {
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+        // Complex LINQ query to aggregate employee data by department
+        employeeCounts = await context.Departments
+    .Include(d => d.Employees.Where(e => e.Active == true))
+    .Select(d => new EmployeeCountModel
+    {
+        DepartmentName = d.DeptName,
+        EmployeeCount = d.Employees.Count(e => e.Active == true)
+    })
+    .Where(ec => ec.EmployeeCount > 0)
+    .ToListAsync();                             // Execute query asynchronously
+    }
+}

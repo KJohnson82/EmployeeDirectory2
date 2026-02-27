@@ -1,0 +1,547 @@
+@page "/Locations"
+@using EmployeeDirectory.Admin.Components.Cards
+@using EmployeeDirectory.Core.Data.Context
+@using EmployeeDirectory.Core.Models
+@using Microsoft.EntityFrameworkCore
+
+
+<RequireAuth>
+
+<PageHeader PageTitle="Locations" CardIcon="@CustomIcons.Factory" />
+
+@* Inject database context for data operations *@
+    @inject IDbContextFactory<AppDbContext> DbContextFactory
+
+@* Configure Telerik Grid with pagination and CRUD capabilities *@
+<TelerikGrid @ref="GridRef"
+             Data="@locations"
+             Pageable="true"
+             PageSize="15"
+             Sortable="true"
+             SortMode="@SortMode.Single"
+             Size="@ThemeConstants.Grid.Size.Small"
+             Resizable="true"
+             Groupable="true"
+             SelectionMode="GridSelectionMode.Single"
+             AutoGenerateColumns="false"
+             EditMode="@GridEditMode.Popup"
+             Class="grid-text"
+             OnUpdate="@Update"
+             OnCreate="@Add"
+             OnDelete="@Delete"
+             OnRowRender="@OnLocationRowRender"
+             ConfirmDelete="true"
+             >
+
+    @* GRID CONFIGURATION - Popup edit settings                         *@
+    <GridSettings>
+        <GridPopupEditSettings MaxHeight="700px"
+                               MaxWidth="700px"
+                               Title="Edit Location"></GridPopupEditSettings>
+        <GridPopupEditFormSettings Columns="2" 
+                                   ColumnSpacing="15px" 
+                                   Orientation="@FormOrientation.Horizontal" 
+                                   ButtonsLayout="FormButtonsLayout.End">
+            @* Buttons aligned to end *@
+        </GridPopupEditFormSettings>
+    </GridSettings>
+
+
+    @* GRID TOOLBAR - Search and add functionality                      *@
+    <GridToolBarTemplate>
+        @* Global search box with debounced input *@
+        <GridSearchBox Placeholder="Search..."
+                       DebounceDelay="300"
+                       Fields="@SearchableFields"></GridSearchBox>
+        @* Add new location button *@
+        <GridCommandButton Command="Add" Icon="SvgIcon.Plus">Add</GridCommandButton>
+    </GridToolBarTemplate>
+
+    @* GRID COLUMNS - Location data fields and custom templates         *@
+    <GridColumns>
+        @* Basic location information columns *@
+        <GridColumn Field="@nameof(Location.LocName)" Title="Location Name" Sortable="true" />
+        @* Location number with custom numeric editor *@
+        <GridColumn Field="@nameof(Location.LocNum)" Title="Loc. # " Sortable="true" Width="100px">
+            <Template>
+                @{
+                    var location = (Location)context;
+                }
+                @location.LocNum
+            </Template>
+            <EditorTemplate>
+                @{
+                    var location = (Location)context;
+                }
+                @* Custom numeric input for location number *@
+                <TelerikNumericTextBox @bind-Value="location.LocNum"
+                                       Min="1" 
+                                       Max="1000" 
+                                       Arrows="false" 
+                                       Placeholder="Enter Loc. #"
+                                       Width="100px" />
+            </EditorTemplate>
+        </GridColumn>
+
+        @* Address information columns *@
+        <GridColumn Field="@nameof(Location.Address)" Title="Street Address" />
+        <GridColumn Field="@nameof(Location.City)" Title="City" Sortable="true" />
+        <GridColumn Field="@nameof(Location.State)" Title="State" Sortable="true" Width="75px" />
+        <GridColumn Field="@nameof(Location.Zipcode)" Title="Zipcode" Width="75px" />
+
+        @* Contact information columns *@
+        <GridColumn Field="@nameof(Location.PhoneNumber)" Title="Phone #" />
+        <GridColumn Field="@nameof(Location.FaxNumber)" Title="Fax #" Visible="false" />        @* Hidden by default *@
+        <GridColumn Field="@nameof(Location.Email)" Title="Location Email" Visible="false" />    @* Hidden by default *@
+        <GridColumn Field="@nameof(Location.Hours)" Title="Hours" Visible="false" />             @* Hidden by default *@
+
+        @* Location type with dropdown editor *@
+            <GridColumn Field="@nameof(Location.Loctype)" Title="Location Type">
+                <Template>
+                    @{
+                        var location = (Location)context;
+                    }
+                    @location.Loctype.GetDisplayName()
+                </Template>
+                <EditorTemplate>
+                    @{
+                        var location = (Location)context;
+                    }
+                    <TelerikDropDownList Data="@LoctypeOptions"
+                                         @bind-Value="location.Loctype"
+                                         ValueField="Value"
+                                         TextField="Text" />
+                </EditorTemplate>
+            </GridColumn>
+
+        @* Management information columns (hidden by default) *@
+        <GridColumn Field="@nameof(Location.AreaManager)" Title="Area Manger" Visible="false" />
+        <GridColumn Field="@nameof(Location.StoreManager)" Title="Store Manager" Visible="false" />
+
+        @* Add this column before the RecordAdd column in Locations.razor *@
+        <GridColumn Field="@nameof(Location.Active)" Title="Status" Width="100px" Sortable="true" TextAlign="@ColumnTextAlign.Center">
+            <Template>
+                @{
+                    var location = (Location)context;
+                    var isActive = location.Active ?? true;
+                }
+                <span class="status-badge @(isActive ? "status-active" : "status-inactive")">
+                    @(isActive ? "Active" : "Inactive")
+                </span>
+            </Template>
+            <EditorTemplate>
+                @{
+                    var location = (Location)context;
+                }
+                <div class="active-toggle-container">
+                    <label class="toggle-label">Location Status:</label>
+                    <TelerikSwitch @bind-Value="location.Active"
+                                   OnLabel="Active"
+                                   OffLabel="Inactive"
+                                   Width="100px" />
+                </div>
+            </EditorTemplate>
+        </GridColumn>
+
+        @* Metadata column (non-editable, hidden) *@
+        <GridColumn Field="@nameof(Location.RecordAdd)" Editable="false" Visible="false" />
+
+        @* COMMAND COLUMN - Action buttons for each location row        *@
+        <GridCommandColumn Width="300px" Title="Location Admin">
+            @* Custom info button to show location details modal *@
+            <GridCommandButton Command="Info"
+                               OnClick="() => ShowLocationInfo((Location)context)"
+                               Icon="@CustomIcons.Factory">Info</GridCommandButton>
+            @* Standard CRUD operation buttons *@
+            <GridCommandButton Command="Edit" Icon="SvgIcon.Pencil">Edit</GridCommandButton>
+            <GridCommandButton Command="Save" Icon="SvgIcon.Save" ShowInEdit="true">Save</GridCommandButton>
+            <GridCommandButton Command="Cancel" Icon="SvgIcon.Cancel" ShowInEdit="true">Cancel</GridCommandButton>
+            <GridCommandButton Command="Delete" Icon="SvgIcon.Trash">Delete</GridCommandButton>
+        </GridCommandColumn>
+    </GridColumns>
+</TelerikGrid>
+</RequireAuth>
+
+@* LOCATION DETAILS MODAL - Reference to location details component      *@
+<LocationCard @ref="LocationCardRef" />
+
+
+@* LOADING INDICATOR - Show while data is being loaded                   *@
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+
+@* COMPONENT STYLES - Grid and window styling                            *@
+<style>
+    /* Main grid text styling */
+    .grid-text {
+        font-family: Roboto; /* Consistent font family */
+        overflow: hidden; /* Hide overflow */
+        text-overflow: ellipsis; /* Show "..." for long text */
+        white-space: nowrap; /* Prevent text wrapping */
+    }
+
+    /* Employee table styling (currently unused) */
+    .employee-table {
+        display: grid; /* Grid layout */
+        border-collapse: collapse; /* Collapsed table borders */
+        margin: 25px 0; /* Vertical margins */
+        font-size: 0.9em; /* Slightly smaller font */
+        min-width: 400px; /* Minimum table width */
+    }
+
+    /* Modal window title bar styling */
+    .k-window-titlebar {
+        background-color: var(--kendo-color-primary); /* Primary color background */
+        color: white; /* White text */
+        font-weight: 700; /* Bold font */
+        font-size: 2em; /* Large font size */
+        padding: 10px; /* Internal padding */
+        text-align: center; /* Center text */
+        text-transform: uppercase; /* All caps */
+        letter-spacing: 1px; /* Letter spacing */
+    }
+
+    /* Employee table header styling */
+    .employee-table thead tr {
+        background-color: var(--kendo-color-primary); /* Primary color background */
+        display: flex; /* Flexbox layout */
+    }
+
+    /* Add this CSS to the style section of each grid page */
+
+    /* Status badge styling */
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .status-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    /* Active toggle container in edit mode */
+    .active-toggle-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .toggle-label {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: var(--kendo-color-primary);
+        background: transparent !important;
+        padding: 0 !important;
+        text-transform: none !important;
+        font-size: 0.9em;
+    }
+
+    /* Inactive row styling - gray out entire row */
+    .k-grid tr.inactive-row {
+        opacity: 0.5;
+        background-color: #f8f9fa !important;
+    }
+
+        .k-grid tr.inactive-row:hover {
+            background-color: #e9ecef !important;
+        }
+
+        .k-grid tr.inactive-row td {
+            color: #6c757d !important;
+        }
+
+    /* Alternative styling for stricter graying out */
+    .k-grid tr.inactive-row {
+        filter: grayscale(60%);
+        opacity: 0.6;
+    }
+
+        .k-grid tr.inactive-row:hover {
+            filter: grayscale(40%);
+            opacity: 0.8;
+        }
+</style>
+
+@code {
+
+    // COMPONENT STATE PROPERTIES
+
+    /// List of locations to display in the grid
+    /// Populated from database on component initialization
+    public List<Location> locations { get; set; } = new List<Location>();
+
+    /// Reference to the Telerik Grid component for programmatic control
+    private TelerikGrid<Location> GridRef { get; set; }
+
+    /// Currently selected location for details display
+    private Location? SelectedLocation { get; set; }
+
+    /// Reference to the location info window (currently unused)
+    private TelerikWindow? LocInfoWindow { get; set; }
+
+    /// Controls visibility of location details window
+    private bool WindowVisible { get; set; }
+
+    /// Reference to the LocationCard component for showing location details
+    private LocationCard? LocationCardRef { get; set; }
+
+    /// Selected location type value for form processing
+    private int LocTypeValue { get; set; }
+
+    /// Loading state indicator for UI feedback
+    private bool isLoading = true;
+
+    /// Applies conditional CSS classes to grid rows based on location active status
+    private void OnLocationRowRender(GridRowRenderEventArgs args)
+    {
+        var location = (Location)args.Item;
+        var isActive = location.Active ?? true;
+
+        if (!isActive)
+        {
+            args.Class = "inactive-row";
+        }
+    }
+
+    // LOCATION TYPE DEFINITIONS - Static reference data
+
+    /// Predefined location types for McElroy Metal facilities
+    /// Used in dropdown for location type selection
+    private List<KeyValuePair<int, string>> LocationTypes = new List<KeyValuePair<int, string>>()
+    {
+        new KeyValuePair<int, string>(1, "Corporate"),      // Corporate headquarters/offices
+        new KeyValuePair<int, string>(2, "Metal Mart"),     // Retail metal sales locations
+        new KeyValuePair<int, string>(3, "Service Center"), // Service and support centers
+        new KeyValuePair<int, string>(4, "Plant")           // Manufacturing plants
+    };
+
+    // COMPONENT LIFECYCLE METHODS
+    /// Component initialization - loads location data from database
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+        await base.OnInitializedAsync();
+    }
+
+    private List<object> LoctypeOptions = Enum.GetValues<Loctype>()
+    .Select(l => new { Text = l.GetDisplayName(), Value = l })
+    .Cast<object>()
+    .ToList();
+
+
+    // DATA MANAGEMENT METHODS
+
+    /// Loads location data from database with error handling
+    /// Filters for active locations only and orders by location number
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            isLoading = true;
+
+            // Create a DbContext from the factory
+            await using var context = await DbContextFactory.CreateDbContextAsync();
+
+            locations = await context.Locations!
+                /* .Where(l => l.Active == true) */    // Only active locations
+                .OrderBy(l => l.LocNum)          // Sort by location number
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            // Log error and handle gracefully
+            Console.Error.WriteLine($"An error occurred while loading data: {ex.Message}");
+            // Could set error message for UI display here
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    // USER INTERACTION METHODS
+
+    /// Shows location details modal for the specified location
+    /// Delegates to LocationCard component
+    public void ShowLocationInfo(Location location)
+    {
+        LocationCardRef.ShowLocationInfo(location);
+    }
+
+    /// Generates dynamic window title for location details
+    /// <returns>Formatted title string</returns>
+    private string GetWindowTitle()
+    {
+        return SelectedLocation != null
+            ? $"{SelectedLocation.LocName} - {SelectedLocation.LocNum} - Details"
+            : "Location Information";
+    }
+
+    /// Opens the location details window
+    private void OpenWindow()
+    {
+        WindowVisible = true;
+    }
+
+    /// Handles location number field changes with validation
+    /// Ensures numeric input for location number
+    /// <param name="location">Location being edited</param>
+    /// <param name="e">Change event arguments</param>
+    private async Task OnLocNumChange(Location location, ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value.ToString(), out int locNum))
+        {
+            location.LocNum = locNum;
+        }
+        else
+        {
+            location.LocNum = null; // Reset to null if invalid input
+        }
+    }
+
+    // CRUD OPERATION METHODS
+
+    /// Updates an existing location in the database and local collection
+    /// <param name="args">Grid command event arguments containing the updated location</param>
+    async Task Update(GridCommandEventArgs args)
+    {
+        try
+        {
+            await using var context = await DbContextFactory.CreateDbContextAsync();
+
+            var location = (Location)args.Item;
+            var existingLocation = await context.Locations.FindAsync(location.Id);
+
+            if (existingLocation != null)
+            {
+                // Use Entity Framework to copy values from updated location to existing entity
+                context.Entry(existingLocation).CurrentValues.SetValues(location);
+                await context.SaveChangesAsync();
+
+                // Update local collection for immediate UI feedback
+                var index = locations.FindIndex(l => l.Id == location.Id);
+                if (index != -1)
+                {
+                    locations[index] = location;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"An error occurred while updating location: {ex.Message}");
+        }
+    }
+
+    /// Adds a new location to the database and local collection
+    /// Sets the record creation timestamp
+    /// <param name="args">Grid command event arguments containing the new location</param>
+    async Task Add(GridCommandEventArgs args)
+    {
+        try
+        {
+            await using var context = await DbContextFactory.CreateDbContextAsync();
+
+            var location = (Location)args.Item;
+            location.RecordAdd = DateTime.UtcNow;        // Set creation timestamp
+            await context.Locations.AddAsync(location); // Add to database
+            await context.SaveChangesAsync();           // Save changes
+
+            locations.Add(location);                      // Add to local collection
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"An error occurred while adding location: {ex.Message}");
+        }
+    }
+
+    /// Deletes a location from the database and local collection
+    /// <param name="args">Grid command event arguments containing the location to delete</param>
+    async Task Delete(GridCommandEventArgs args)
+    {
+        try
+        {
+            await using var context = await DbContextFactory.CreateDbContextAsync();
+
+            var location = (Location)args.Item;
+            var existingLocation = await context.Locations.FindAsync(location.Id);
+
+            if (existingLocation != null)
+            {
+                context.Locations.Remove(existingLocation); // Remove from database
+                await context.SaveChangesAsync();           // Save changes
+                locations.Remove(location);                   // Remove from local collection
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"An error occurred while deleting location: {ex.Message}");
+            throw; // Re-throw to handle at higher level if needed
+        }
+    }
+
+
+    // UTILITY METHODS
+
+    /// Generic save method for both new and existing locations
+    /// <param name="item">Location to save</param>
+    /// <param name="isNew">Whether this is a new location</param>
+    private async Task SaveItem(Location item, bool isNew)
+    {
+        if (isNew)
+        {
+            await Add(new GridCommandEventArgs { Item = item });
+        }
+        else
+        {
+            await Update(new GridCommandEventArgs { Item = item });
+        }
+        await ClosePopup();
+    }
+
+    /// Closes the edit popup by clearing the grid's edit state
+    private async Task ClosePopup()
+    {
+        var state = GridRef?.GetState();
+        if (state != null)
+        {
+            state.OriginalEditItem = null; // Clear original item
+            state.EditItem = null;         // Clear edit item
+            state.InsertedItem = null;     // Clear inserted item
+
+            await GridRef?.SetStateAsync(state);
+        }
+    }
+
+   
+
+    // SEARCH CONFIGURATION
+
+    /// Fields that are searchable through the global search box
+    /// Includes key location identification and contact fields
+    private List<string> SearchableFields = new List<string>
+    {
+        nameof(Location.LocName),      // Location name
+        nameof(Location.LocNum),       // Location number
+        nameof(Location.City),         // City
+        nameof(Location.State),        // State
+        nameof(Location.PhoneNumber),  // Phone number
+        nameof(Location.Email)         // Email address
+    };
+}

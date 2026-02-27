@@ -1,0 +1,130 @@
+﻿
+@using EmployeeDirectory.Core.Models
+@using Telerik.Blazor.Components
+@using Telerik.SvgIcons
+
+<TelerikForm Model="@Employee"
+             Columns="2"
+             ColumnSpacing="15px"
+             ButtonsLayout="@FormButtonsLayout.End"
+             OnValidSubmit="@OnValidSubmit">
+    <FormItems>
+        <FormItem Field="@nameof(Employee.FirstName)" LabelText="First Name" />
+        <FormItem Field="@nameof(Employee.LastName)" LabelText="Last Name" />
+        <FormItem Field="@nameof(Employee.JobTitle)" LabelText="Job Title" />
+        <FormItem Field="@nameof(Employee.IsManager)" LabelText="Manager" />
+
+        <FormItem Field="@nameof(Employee.PhoneNumber)" LabelText="Phone #">
+            <Template>
+                <label class="k-label k-form-label">Phone #</label>
+                <div class="k-form-field-wrap">
+                    <TelerikMaskedTextBox @bind-Value="@Employee.PhoneNumber"
+                                          Mask="(000) 000-0000"
+                                          Placeholder="(000) 000-0000" />
+                </div>
+            </Template>
+        </FormItem>
+
+        <FormItem Field="@nameof(Employee.CellNumber)" LabelText="Alt #" />
+        <FormItem Field="@nameof(Employee.Extension)" LabelText="Ext" />
+        <FormItem Field="@nameof(Employee.Email)" LabelText="Email" />
+        <FormItem Field="@nameof(Employee.NetworkId)" LabelText="Network ID" />
+
+        <FormItem Field="@nameof(Employee.Location)" LabelText="Location">
+            <Template>
+                <label class="k-label k-form-label">Location</label>
+                <div class="k-form-field-wrap">
+                    <TelerikDropDownList Data="@Locations"
+                                         @bind-Value="@Employee.Location"
+                                         ValueField="Id"
+                                         TextField="LocName"
+                                         DefaultText="Select Location..."
+                                         OnChange="@OnLocationChanged" />
+                </div>
+            </Template>
+        </FormItem>
+
+        <FormItem Field="@nameof(Employee.Department)" LabelText="Department">
+            <Template>
+                <label class="k-label k-form-label">Department</label>
+                <div class="k-form-field-wrap">
+                    <TelerikDropDownList Data="@FilteredDepartments"
+                                         @bind-Value="@Employee.Department"
+                                         ValueField="Id"
+                                         TextField="DeptName"
+                                         DefaultText="Select Department..." />
+                </div>
+            </Template>
+        </FormItem>
+
+        <FormItem Field="@nameof(Employee.Active)" LabelText="Status" ColSpan="2">
+            <Template>
+                <label class="k-label k-form-label">Employee Status</label>
+                <div class="k-form-field-wrap active-toggle-container">
+                    <TelerikSwitch @bind-Value="@Employee.Active"
+                                   OnLabel="Active"
+                                   OffLabel="Inactive"
+                                   Width="100px" />
+                </div>
+            </Template>
+        </FormItem>
+    </FormItems>
+    <FormButtons>
+        <TelerikButton Icon="@nameof(SvgIcon.Save)"
+                       ThemeColor="primary"
+                       ButtonType="@ButtonType.Submit">Save</TelerikButton>
+        <TelerikButton Icon="@nameof(SvgIcon.Cancel)"
+                       ButtonType="@ButtonType.Button"
+                       OnClick="@OnCancelClick">Cancel</TelerikButton>
+    </FormButtons>
+</TelerikForm>
+
+<style>
+    .active-toggle-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 10px;
+        overflow: visible;
+    }
+</style>
+
+@code {
+    [Parameter, EditorRequired]
+    public Employee Employee { get; set; } = new();
+
+    [Parameter, EditorRequired]
+    public List<Location> Locations { get; set; } = new();
+
+    [Parameter, EditorRequired]
+    public List<Department> Departments { get; set; } = new();
+
+    [Parameter]
+    public EventCallback OnSave { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    // Departments filtered by selected location
+    private List<Department> FilteredDepartments =>
+        Employee.Location == null || Employee.Location == 0
+            ? Departments
+            : Departments.Where(d => d.Location == Employee.Location).ToList();
+
+    private async Task OnValidSubmit()
+    {
+        await OnSave.InvokeAsync();
+    }
+
+    private async Task OnCancelClick()
+    {
+        await OnCancel.InvokeAsync();
+    }
+
+    private void OnLocationChanged(object newValue)
+    {
+        // Reset department when location changes
+        Employee.Department = null;
+    }
+}

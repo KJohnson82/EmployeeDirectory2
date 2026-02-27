@@ -1,0 +1,92 @@
+﻿@rendermode InteractiveServer
+@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<RequireAuth>
+    <PageHeader PageTitle="Directory Manager" CardIcon="@CustomIcons.Waving_Hand" />
+
+    @* Dashboard with statistical widgets *@
+    <div>
+        <TelerikTileLayout Columns="3"
+                           ColumnSpacing="15"
+                           Reorderable="false"
+                           Resizable="false">
+            <TileLayoutItems>
+                @* Recently added employees *@
+                <TileLayoutItem>
+                    <HeaderTemplate>
+                        <div class="tile-header">Newest Employees</div>
+                    </HeaderTemplate>
+                    <Content>
+                        <EmployeeDirectory.Admin.Components.StatData.NewestEmployee />
+                    </Content>
+                </TileLayoutItem>
+
+                @* Recently added departments *@
+                <TileLayoutItem>
+                    <HeaderTemplate>
+                        <div class="tile-header">Newest Departments</div>
+                    </HeaderTemplate>
+                    <Content>
+                        <EmployeeDirectory.Admin.Components.StatData.NewestDepartment />
+                    </Content>
+                </TileLayoutItem>
+
+                @* Recently added locations *@
+                <TileLayoutItem>
+                    <HeaderTemplate>
+                        <div class="tile-header">Newest Locations</div>
+                    </HeaderTemplate>
+                    <Content>
+                        <EmployeeDirectory.Admin.Components.StatData.NewestLocation />
+                    </Content>
+                </TileLayoutItem>
+
+                @* Location count widget (spans 2 rows) *@
+                <TileLayoutItem RowSpan="2">
+                    <HeaderTemplate>
+                        <div class="tile-header">Location Count</div>
+                    </HeaderTemplate>
+                    <Content>
+                        <EmployeeDirectory.Admin.Components.StatData.LocationsCount />
+                    </Content>
+                </TileLayoutItem>
+
+                @* Employee distribution chart (spans 2 columns and 2 rows) *@
+                <TileLayoutItem ColSpan="2" RowSpan="2">
+                    <HeaderTemplate>
+                        <div class="tile-header">Employee Count Per Department</div>
+                    </HeaderTemplate>
+                    <Content>
+                        <EmployeeDirectory.Admin.Components.StatData.EmployeeDepartmentCount />
+                    </Content>
+                </TileLayoutItem>
+            </TileLayoutItems>
+        </TelerikTileLayout>
+    </div>
+</RequireAuth>
+
+<style>
+    #home-page {
+        margin-left: auto;
+        margin-right: auto;
+        max-width: max-content;
+        text-align: center;
+        font-size: var(--kendo-font-size-xl);
+    }
+
+    @@media (min-height: calc(56px + 50px + 400px)) {
+        #home-page {
+            margin-top: calc(40vh - 28px - 25px - 200px);
+        }
+    }
+
+    .tile-header {
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    
+</style>

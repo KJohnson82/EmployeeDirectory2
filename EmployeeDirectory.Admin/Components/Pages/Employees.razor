@@ -1,0 +1,550 @@
+@page "/Employees"
+
+@using EmployeeDirectory.Admin.Components.Cards
+@using EmployeeDirectory.Core.Data.Context
+@using EmployeeDirectory.Core.Models
+@using Microsoft.EntityFrameworkCore
+@using Telerik.Blazor.Components
+@inject IDbContextFactory<AppDbContext> DbContextFactory
+
+<RequireAuth>
+    <PageHeader PageTitle="Employees"
+                CardIcon="@CustomIcons.Face" />
+
+    @* Employees grid with full CRUD capabilities *@
+    <TelerikGrid Data="@employees"
+                 Pageable="true"
+                 PageSize="15"
+                 Sortable="true"
+                 SortMode="@SortMode.Single"
+                 Size="@ThemeConstants.Grid.Size.Small"
+                 Resizable="true"
+                 Groupable="true"
+                 SelectionMode="GridSelectionMode.Single"
+                 Class="grid-text"
+                 AutoGenerateColumns="false"
+                 EditMode="@GridEditMode.Popup"
+                 ConfirmDelete="true"
+                 OnUpdate="@Update"
+                 OnCreate="@Add"
+                 OnDelete="@Delete"
+                 OnRowRender="@OnEmployeeRowRender">
+
+        <GridSettings>
+            <GridPopupEditSettings MaxHeight="auto"
+                                   MaxWidth="90vh"
+                                   Title="Add/Edit Employee"
+                                   MinWidth="500px"
+            ></GridPopupEditSettings>
+            <GridPopupEditFormSettings 
+                Context="formContext"
+                Columns="2"
+                                       ColumnSpacing="15px"
+                                       Orientation="@FormOrientation.Horizontal"
+                                       ButtonsLayout="FormButtonsLayout.End">
+            </GridPopupEditFormSettings>
+        </GridSettings>
+        @* <GridSettings>
+            <GridPopupEditSettings MaxHeight="95vh"
+                                   MaxWidth="700px"
+                                   Title="Add/Edit Employee"
+                                   MinWidth="500px">
+            </GridPopupEditSettings>
+            <GridPopupEditFormSettings Context="formContext">
+                <FormTemplate>
+                    @{
+                        if (GridEditItem != formContext.Item)
+                            GridEditItem = (Employee)formContext.Item;
+                    }
+                    <EmployeeEditForm Employee="@GridEditItem"
+                                      Locations="@locations"
+                                      Departments="@departments"
+                                      OnSave="@OnFormSave"
+                                      OnCancel="@ExitGridEditMode" />
+                </FormTemplate>
+            </GridPopupEditFormSettings>
+        </GridSettings> *@
+
+        <GridToolBarTemplate>
+            <GridSearchBox Placeholder="Search..."
+                           DebounceDelay="300"
+                           Fields="@SearchableFields"></GridSearchBox>
+            <GridCommandButton Command="Add" Icon="SvgIcon.Plus">Add</GridCommandButton>
+        </GridToolBarTemplate>
+
+        <GridColumns>
+            <GridColumn Field="@nameof(Employee.FirstName)" Title="First Name" Sortable="true" Filterable="false" />
+            <GridColumn Field="LastName" Title="Last Name" Sortable="true" Filterable="false" />
+            <GridColumn Field="JobTitle" Title="Job Title" Sortable="false" />
+
+            @* Manager indicator with star icon *@
+            <GridColumn Field="IsManager" Title="Manager" Sortable="true" Width="75px" Filterable="false" TextAlign="@ColumnTextAlign.Center">
+                <Template Context="employee">
+                    @{
+                        var isManager = ((Employee)employee).IsManager ?? false;
+                    }
+                    @if (isManager)
+                    {
+                        <TelerikSvgIcon Icon="@CustomIcons.Star"
+                                        Size="@ThemeConstants.SvgIcon.Size.ExtraLarge"
+                                        ThemeColor="@ThemeConstants.SvgIcon.ThemeColor.Primary"
+                                        Class="" />
+                    }
+                </Template>
+            </GridColumn>
+
+            <GridColumn Field="PhoneNumber" Title="Phone #" Filterable="false" Sortable="false" Visible="false" />
+            <GridColumn Field="CellNumber" Title="Alt #" Filterable="false" Sortable="false" Visible="false" />
+            <GridColumn Field="Extension" Width="75px" Title="Ext" Filterable="false" Sortable="false" />
+            <GridColumn Field="Email" Title="Email" Sortable="false" Visible="false" />
+
+            <GridColumn Field="NetworkId" Title="Network Id" Sortable="false" />
+
+            @* Employee avatar with initials *@
+            <GridColumn Field="EmpAvatar" Title="Employee Avatar" Sortable="false" Filterable="false" Visible="true" TextAlign="@ColumnTextAlign.Center">
+                <Template>
+                    @{
+                        var employee = (Employee)context;
+                        var initials = GetInitials(employee.FirstName, employee.LastName);
+                    }
+                    <TelerikAvatar Type="AvatarType.Text" Size="md">
+                        @initials
+                    </TelerikAvatar>
+                </Template>
+            </GridColumn>
+
+            @* Location assignment with dropdown editor *@
+            <GridColumn Field="@nameof(Employee.Location)" Title="Location">
+                <Template>
+                    @{
+                        var employee = (Employee)context;
+                        var locationName = locations.FirstOrDefault(l => l.Id == employee.Location)?.LocName;
+                    }
+                    @locationName
+                </Template>
+                <EditorTemplate>
+                    @{
+                        var employee = (Employee)context;
+                    }
+                    <TelerikDropDownList Data="@locations"
+                                         @bind-Value="@employee.Location"
+                                         ValueField="Id"
+                                         TextField="LocName"
+                                         DefaultText="Select Location..."
+                                         OnChange="@((object newValue) => OnLocationChanged(employee, newValue))" />
+                </EditorTemplate>
+            </GridColumn>
+
+            @* Department assignment filtered by location *@
+            <GridColumn Field="@nameof(Employee.Department)" Title="Department">
+                <Template>
+                    @{
+                        var employee = (Employee)context;
+                        var departmentName = departments.FirstOrDefault(d => d.Id == employee.Department)?.DeptName;
+                    }
+                    @departmentName
+                </Template>
+                <EditorTemplate>
+                    @{
+                        var employee = (Employee)context;
+                        var locDepartments = GetDepartmentsByLoc(employee.Location);
+                    }
+                    <TelerikDropDownList Data="@locDepartments"
+                                         @bind-Value="@employee.Department"
+                                         ValueField="Id"
+                                         TextField="DeptName"
+                                         DefaultText="Select Department..." />
+                </EditorTemplate>
+            </GridColumn>
+
+            @* Active/Inactive status badge *@
+            <GridColumn Field="@nameof(Employee.Active)" Title="Status" Width="100px" Sortable="true" TextAlign="@ColumnTextAlign.Center">
+                <Template>
+                    @{
+                        var employee = (Employee)context;
+                        var isActive = employee.Active ?? true;
+                    }
+                    <span class="status-badge @(isActive ? "status-active" : "status-inactive")">
+                        @(isActive ? "Active" : "Inactive")
+                    </span>
+                </Template>
+                <EditorTemplate>
+                    @{
+                        var employee = (Employee)context;
+                    }
+                    <div class="active-toggle-container">
+                        <label class="toggle-label">Employee Status:</label>
+                        <TelerikSwitch @bind-Value="employee.Active"
+                                       OnLabel="Active"
+                                       OffLabel="Inactive"
+                                       Width="100px" />
+                    </div>
+                </EditorTemplate>
+            </GridColumn>
+
+            <GridColumn Field="RecordAdd" Sortable="true" Filterable="false" Visible="false" Editable="false" />
+
+            @* Action buttons for each employee *@
+            <GridCommandColumn Width="300px" Title="Employee Admin">
+                <GridCommandButton Command="Info"
+                                   OnClick="() => ShowEmployeeInfo((Employee)context)"
+                                   Icon="@CustomIcons.Emoji_People">Info</GridCommandButton>
+                <GridCommandButton Command="Edit" Icon="SvgIcon.Pencil">Edit</GridCommandButton>
+                <GridCommandButton Command="Save" Icon="SvgIcon.Save" ShowInEdit="true">Save</GridCommandButton>
+                <GridCommandButton Command="Cancel" Icon="SvgIcon.Cancel" ShowInEdit="true">Cancel</GridCommandButton>
+                <GridCommandButton Command="Delete" Icon="SvgIcon.Trash">Delete</GridCommandButton>
+            </GridCommandColumn>
+        </GridColumns>
+    </TelerikGrid>
+</RequireAuth>
+
+<EmployeeCard @ref="EmployeeCardRef" Locations="@locations" Departments="@departments" />
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+
+<style>
+    .grid-text {
+        font-family: Roboto;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .employee-table {
+        display: grid;
+        border-collapse: collapse;
+        margin: 25px 0;
+        font-size: 0.9em;
+        min-width: 400px;
+    }
+
+    .k-window-titlebar {
+        background-color: var(--kendo-color-primary);
+        color: white;
+        font-weight: 700;
+        font-size: 2em;
+        padding: 10px;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .employee-table thead tr {
+        background-color: var(--kendo-color-primary);
+        display: flex;
+    }
+
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .status-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .active-toggle-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .toggle-label {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: var(--kendo-color-primary);
+        background: transparent !important;
+        padding: 0 !important;
+        text-transform: none !important;
+        font-size: 0.9em;
+    }
+
+    .k-grid tr.inactive-row {
+        opacity: 0.5;
+        background-color: #f8f9fa !important;
+    }
+
+        .k-grid tr.inactive-row:hover {
+            background-color: #e9ecef !important;
+        }
+
+        .k-grid tr.inactive-row td {
+            color: #6c757d !important;
+        }
+
+    .k-grid tr.inactive-row {
+        filter: grayscale(60%);
+        opacity: 0.6;
+    }
+
+        .k-grid tr.inactive-row:hover {
+            filter: grayscale(40%);
+            opacity: 0.8;
+        }
+</style>
+
+@code {
+    public List<Location> locations { get; set; } = new List<Location>();
+    private List<Department> departments { get; set; } = new List<Department>();
+    private List<Employee> employees { get; set; } = new List<Employee>();
+    private bool isLoading = true;
+    private TelerikPopup? PopupRef { get; set; }
+    private Employee? SelectedEmployee { get; set; }
+    private TelerikWindow? EmpInfoWindow { get; set; }
+    private bool WindowVisible { get; set; }
+    private EmployeeCard? EmployeeCardRef { get; set; }
+    private List<Department> filteredDepartments = new List<Department>();
+    private int? currentLocationFilter = null;
+    private TelerikGrid<Employee>? GridRef { get; set; }
+    private Employee? GridEditItem { get; set; }
+
+    // Apply CSS class to inactive employee rows
+    private void OnEmployeeRowRender(GridRowRenderEventArgs args)
+    {
+        var employee = (Employee)args.Item;
+        var isActive = employee.Active ?? true;
+
+        if (!isActive)
+        {
+            args.Class = "inactive-row";
+        }
+    }
+
+    // Show employee details modal
+    public void ShowEmployeeInfo(Employee employee)
+    {
+        EmployeeCardRef?.ShowEmployeeInfo(employee);
+    }
+
+    private string GetWindowTitle()
+    {
+        return SelectedEmployee != null
+            ? $"{SelectedEmployee.FirstName} {SelectedEmployee.LastName} - Details"
+            : "Employee Information";
+    }
+
+    private void OpenWindow()
+    {
+        WindowVisible = true;
+    }
+
+    private void ShowPopup(Employee? employee)
+    {
+        if (employee != null)
+        {
+            SelectedEmployee = employee;
+            PopupRef?.Show();
+        }
+    }
+
+    // Load employee, location, and department data from database
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        try
+        {
+            isLoading = true;
+            await using var context = await DbContextFactory.CreateDbContextAsync();
+
+            locations = await context.Locations.OrderBy(l => l.LocNum).ThenBy(l  => l.LocName).ToListAsync();
+            departments = await context.Departments.ToListAsync();
+
+            employees = await context.Employees!
+                .Include(e => e.EmpLocation)
+                .Include(e => e.EmpDepartment)
+                .OrderBy(e => e.EmpLocation!.LocName)
+                .ThenBy(e => e.EmpDepartment!.DeptName)
+                .ThenBy(e => e.FirstName + e.LastName)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"An error occurred while loading data: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // Update existing employee
+    async Task Update(GridCommandEventArgs args)
+    {
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+
+        try
+        {
+            var employee = (Employee)args.Item;
+            var existingEmployee = await context.Employees.FindAsync(employee.Id);
+
+            if (existingEmployee != null)
+            {
+                context.Entry(existingEmployee).CurrentValues.SetValues(employee);
+                await context.SaveChangesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"An error occurred while updating employee: {ex.Message}");
+        }
+    }
+
+    // Add new employee
+    async Task Add(GridCommandEventArgs args)
+    {
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+
+        try
+        {
+            var employee = (Employee)args.Item;
+            employee.RecordAdd = DateTime.UtcNow;
+            await context.Employees.AddAsync(employee);
+            await context.SaveChangesAsync();
+            employees.Add(employee);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"An error occurred while adding employee: {ex.Message}");
+        }
+    }
+
+    // Delete employee
+    async Task Delete(GridCommandEventArgs args)
+    {
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+
+        try
+        {
+            var employee = (Employee)args.Item;
+            var existingEmployee = await context.Employees.FindAsync(employee.Id);
+
+            if (existingEmployee != null)
+            {
+                context.Employees.Remove(existingEmployee);
+                await context.SaveChangesAsync();
+                employees.Remove(employee);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"An error occurred while deleting employee: {ex.Message}");
+        }
+    }
+
+    private string ManagerDisplay(Employee employee)
+    {
+        return employee.IsManager ?? false ? "Manager" : " ";
+    }
+
+    // Generate initials from first and last names
+    private string GetInitials(string? firstName, string? lastName)
+    {
+        var first = !string.IsNullOrEmpty(firstName) ? firstName[0].ToString().ToUpper() : "";
+        var last = !string.IsNullOrEmpty(lastName) ? lastName[0].ToString().ToUpper() : "";
+        return $"{first}{last}";
+    }
+
+    // Fields searchable through global search box
+    private List<string> SearchableFields = new List<string>
+    {
+        nameof(Employee.FirstName),
+        nameof(Employee.LastName),
+        nameof(Employee.JobTitle),
+        nameof(Employee.Extension)
+    };
+
+    // Filter departments by selected location
+    private List<Department> GetDepartmentsByLoc(int? locationID)
+    {
+        if (locationID == null || locationID == 0)
+        {
+            return departments;
+        }
+        return departments.Where(d => d.Location == locationID).ToList();
+    }
+
+    // Reset department when location changes
+    private void OnLocationChanged(Employee employee, object newValue)
+    {
+        if (employee.Location != currentLocationFilter)
+        {
+            employee.Department = null;
+            currentLocationFilter = employee.Location;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnFormSave()
+    {
+        if (GridEditItem is null) return;
+
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+        try
+        {
+            if (GridEditItem.Id != default)
+            {
+                var existing = await context.Employees.FindAsync(GridEditItem.Id);
+                if (existing != null)
+                {
+                    context.Entry(existing).CurrentValues.SetValues(GridEditItem);
+                    await context.SaveChangesAsync();
+                    var idx = employees.FindIndex(e => e.Id == GridEditItem.Id);
+                    if (idx != -1) employees[idx] = GridEditItem;
+                }
+            }
+            else
+            {
+                GridEditItem.RecordAdd = DateTime.UtcNow;
+                await context.Employees.AddAsync(GridEditItem);
+                await context.SaveChangesAsync();
+                employees.Add(GridEditItem);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error saving employee: {ex.Message}");
+        }
+
+        await ExitGridEditMode();
+    }
+
+    private async Task ExitGridEditMode()
+    {
+        if (GridRef is null) return;
+
+        var state = GridRef.GetState();
+        state.OriginalEditItem = null!;
+        state.EditItem = null!;
+        state.InsertedItem = null!;
+
+        await GridRef.SetStateAsync(state);
+        GridEditItem = null;
+    }
+
+    private void OnGridCancel(GridCommandEventArgs args)
+    {
+        GridEditItem = null;
+    }
+}

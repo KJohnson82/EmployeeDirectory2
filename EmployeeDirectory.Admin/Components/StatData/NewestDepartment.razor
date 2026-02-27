@@ -1,0 +1,63 @@
+﻿
+@using EmployeeDirectory.Core.Data.Context
+@using EmployeeDirectory.Core.Models
+@using Microsoft.EntityFrameworkCore
+@using Telerik.Blazor
+@using Telerik.Blazor.Components
+@using Telerik.SvgIcons
+
+
+@* Inject database context for data operations *@
+@inject IDbContextFactory<AppDbContext> DbContextFactory
+
+@* CONDITIONAL RENDERING - Handle loading and empty states               *@
+
+@* Loading state - shown while data is being fetched from database *@
+@if (departments == null)
+{
+    <p>Loading...</p>
+}
+@* Empty state - shown when no departments exist in database *@
+else if (!departments.Any())
+{
+    <p>No departments found.</p> 
+}
+@* Data display state - shown when departments are successfully loaded *@
+else
+{
+    @* DEPARTMENT LIST - Ordered list of recently added departments      *@
+    <ol>
+        @foreach (var department in departments)
+        {
+            <li>
+                @* Department name and location display *@
+                <strong>@department.DeptName - @department.DeptLocation?.LocName</strong> <br />
+                @* Record creation date display *@
+                Added On: @department.RecordAdd?.ToString("MM/dd/yyyy") <br />
+            </li>
+        }
+    </ol>
+}
+
+@code {
+    // COMPONENT STATE PROPERTIES
+
+    /// List of the most recently added departments
+    /// Initialized as null to enable loading state detection
+    /// Populated with top 3 newest departments from database
+    private List<Department> departments { get; set; }
+
+    // COMPONENT LIFECYCLE METHODS
+
+    /// Component initialization - loads the 3 most recently added departments
+    /// Orders departments by creation date (newest first) and takes top 3
+    /// Includes location navigation property for display purposes
+    protected override async Task OnInitializedAsync()
+    {
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+        departments = await context.Departments
+            .OrderByDescending(d => d.RecordAdd)    // Sort by creation date, newest first
+            .Take(3)                                // Limit to 3 most recent departments
+            .ToListAsync();                         // Execute query asynchronously
+    }
+}

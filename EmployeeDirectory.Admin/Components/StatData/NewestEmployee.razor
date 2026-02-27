@@ -1,0 +1,62 @@
+﻿
+@using EmployeeDirectory.Core.Data.Context
+@using EmployeeDirectory.Core.Models
+@using Microsoft.EntityFrameworkCore
+@using Telerik.Blazor
+@using Telerik.Blazor.Components
+@using Telerik.SvgIcons
+
+
+@* Inject database context for data operations *@
+@inject IDbContextFactory<AppDbContext> DbContextFactory
+
+@* CONDITIONAL RENDERING - Handle loading and empty states               *@
+@* Loading state - shown while data is being fetched from database *@
+@if (employees == null)
+{
+    <p>Loading...</p>
+}
+@* Empty state - shown when no employees exist in database *@
+else if (!employees.Any())
+{
+    <p>No employees found.</p>
+}
+@* Data display state - shown when employees are successfully loaded *@
+else
+{
+    @* EMPLOYEE LIST - Ordered list of recently added employees         *@
+    <ol>
+        @foreach (var employee in employees)
+        {
+            <li>
+                @* Employee full name display *@
+                <strong>@employee.FirstName @employee.LastName</strong> <br />
+                @* Record creation date display *@
+                Added On: @employee.RecordAdd?.ToString("MM/dd/yyyy") <br />
+            </li>
+        }
+    </ol>
+}
+
+@code {
+    // COMPONENT STATE PROPERTIES
+
+    /// List of the most recently added employees
+    /// Initialized as empty list but set to null during loading for state detection
+    /// Populated with top 3 newest employees from database
+    private List<Employee> employees { get; set; } = new List<Employee>();
+
+    // COMPONENT LIFECYCLE METHODS
+
+    /// Component initialization - loads the 3 most recently added employees
+    /// Orders employees by creation date (newest first) and takes top 3
+    /// Simple query without navigation properties for fast loading
+    protected override async Task OnInitializedAsync()
+    {
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+        employees = await context.Employees
+            .OrderByDescending(e => e.RecordAdd)    // Sort by creation date, newest first
+            .Take(3)                                // Limit to 3 most recent employees
+            .ToListAsync();                         // Execute query asynchronously
+    }
+}

@@ -1,0 +1,62 @@
+﻿
+@using EmployeeDirectory.Core.Data.Context
+@using EmployeeDirectory.Core.Models
+@using Microsoft.EntityFrameworkCore
+@using Telerik.Blazor
+@using Telerik.Blazor.Components
+@using Telerik.SvgIcons
+
+
+@* Inject database context for data operations *@
+@inject IDbContextFactory<AppDbContext> DbContextFactory
+
+@* CONDITIONAL RENDERING - Handle loading and empty states               *@
+@* Loading state - shown while data is being fetched from database *@
+@if (locations == null)
+{
+    <p>Loading...</p>
+}
+@* Empty state - shown when no locations exist in database *@
+else if (!locations.Any())
+{
+    <p>No locations found.</p>  @* Note: Message says "employees" but should say "locations" *@
+}
+@* Data display state - shown when locations are successfully loaded *@
+else
+{
+    @* LOCATION LIST - Ordered list of recently added locations         *@
+    <ol>
+        @foreach (var location in locations)
+        {
+            <li>
+                @* Location name and number display *@
+                <strong>@location.LocName - @location.LocNum</strong> <br />
+                @* Record creation date display *@
+                Added On: @location.RecordAdd?.ToString("MM/dd/yyyy")
+            </li>
+        }
+    </ol>
+}
+
+@code {
+    // COMPONENT STATE PROPERTIES
+
+    /// List of the most recently added locations
+    /// Initialized as null to enable loading state detection
+    /// Populated with top 3 newest locations from database
+    private List<Location> locations { get; set; }
+
+    // COMPONENT LIFECYCLE METHODS
+
+    /// Component initialization - loads the 3 most recently added locations
+    /// Orders locations by creation date (newest first) and takes top 3
+    /// Simple query without navigation properties for fast loading
+    protected override async Task OnInitializedAsync()
+    {
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+        locations = await context.Locations
+            .OrderByDescending(l => l.RecordAdd)    // Sort by creation date, newest first
+            .Take(3)                                // Limit to 3 most recent locations
+            .ToListAsync();                         // Execute query asynchronously
+    }
+}

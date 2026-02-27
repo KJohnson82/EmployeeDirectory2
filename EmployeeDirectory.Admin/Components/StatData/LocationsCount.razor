@@ -1,0 +1,81 @@
+﻿
+@using EmployeeDirectory.Core.Data.Context
+@using Microsoft.EntityFrameworkCore
+@using Telerik.Blazor
+@using Telerik.Blazor.Components
+@using Telerik.SvgIcons
+
+
+@* Inject database context for data operations *@
+@inject IDbContextFactory<AppDbContext> DbContextFactory
+
+@* TELERIK DONUT CHART - Location type distribution visualization        *@
+<TelerikChart>
+    <ChartSeriesItems>
+        @* Donut chart series displaying location counts by type *@
+        <ChartSeries Type="ChartSeriesType.Donut" 
+                     Data="@locationsDonut" 
+                     Field="@nameof(LocationsModel.LocationValue)" 
+                     CategoryField="@nameof(LocationsModel.TypeName)">
+            @* Categories: location type names *@
+            @* Chart labels configuration *@
+            <ChartSeriesLabels Visible="true" 
+                               Background="transparent" />           @* Transparent label background *@
+        </ChartSeries>
+    </ChartSeriesItems>
+
+    @* Chart configuration and styling *@
+    <ChartTitle Text="Location Totals by Type"></ChartTitle>         @* Chart title *@
+    <ChartLegend Position="ChartLegendPosition.Bottom" 
+                 Background=""></ChartLegend>                        @* Transparent legend background *@
+</TelerikChart>
+
+@code {
+    // COMPONENT STATE PROPERTIES
+
+    /// List of location count data aggregated by location type
+    /// Populated during component initialization from database query
+    /// Excludes corporate locations (Loctype = 1) to focus on operational facilities
+    public List<LocationsModel> locationsDonut { get; set; } = new();
+
+    // DATA MODEL CLASSES
+
+    /// Data model representing location count for a specific location type
+    /// Used as the data source for the Telerik Donut Chart component
+    public class LocationsModel
+    {
+        /// Human-readable location type name for chart display
+        /// Used as the category field in the donut chart segments
+        /// Values: "Metal Mart", "Service Center", "Plant"
+        public string TypeName { get; set; } = "";
+
+        /// Number of locations of this type
+        /// Used as the value field determining segment size in donut chart
+        public int LocationValue { get; set; }
+    }
+
+    // COMPONENT LIFECYCLE METHODS
+
+    protected override async Task OnInitializedAsync()
+    {
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+
+        var locData = await context.Locations
+            .Where(l => l.Loctype != Loctype.Corporate)
+            .GroupBy(l => l.Loctype)
+            .Select(g => new
+            {
+                Loctype = g.Key,
+                Count = g.Count()
+            })
+            .ToListAsync();
+
+        locationsDonut = locData
+            .Select(g => new LocationsModel
+            {
+                TypeName = g.Loctype.GetDisplayName(),
+                LocationValue = g.Count
+            })
+            .ToList();
+    }
+}
