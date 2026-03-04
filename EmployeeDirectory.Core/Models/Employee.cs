@@ -30,10 +30,15 @@ public partial class Employee
 
     [StringLength(15)]
     [Required]
+    [Phone]
     public string? PhoneNumber { get; set; }
 
     [StringLength(15)]
     public string? CellNumber { get; set; }
+
+    [StringLength(15)]
+    [Phone]
+    public string? AltNumber { get; set; }
 
     [StringLength(8)]
     [Column(TypeName = "TEXT")]
@@ -41,15 +46,17 @@ public partial class Employee
 
     [StringLength(60)]
     [Required]
+    [EmailAddress]
     public string? Email { get; set; }
 
     public string? NetworkId { get; set; }
 
     public string? EmpAvatar { get; set; }
 
-
+    [Required]
     public int? Location { get; set; }
 
+    [Required]
     public int? Department { get; set; }
 
     [JsonIgnore]

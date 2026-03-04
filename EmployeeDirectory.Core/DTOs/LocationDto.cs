@@ -19,6 +19,7 @@ namespace EmployeeDirectory.Core.DTOs
         public string? Zipcode { get; set; }
         public string? PhoneNumber { get; set; }
         public string? FaxNumber { get; set; }
+        public string? AltNumber { get; set; }
         public string? Email { get; set; }
         public string? Hours { get; set; }
         public Loctype Loctype { get; set; }

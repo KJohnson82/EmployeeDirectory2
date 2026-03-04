@@ -1,10 +1,4 @@
-﻿@* ===================================================================== *@
-@* LOCATION DETAILS MODAL COMPONENT                                      *@
-@* Displays comprehensive location information in a popup window         *@
-@* ===================================================================== *@
-
-@* Import necessary namespaces for Entity Framework, Telerik components, and data models *@
-@using EmployeeDirectory.Core.Data.Context
+﻿@using EmployeeDirectory.Core.Data.Context
 @using EmployeeDirectory.Core.Models
 @using Microsoft.EntityFrameworkCore
 @using Telerik.Blazor
@@ -16,26 +10,18 @@
 @using Telerik.DataSource
 @using Telerik.DataSource.Extensions
 
-
-@* Inject database context for data access *@
 @inject AppDbContext dbContext
 
-@* ===================================================================== *@
-@* MODAL WINDOW CONTAINER                                                *@
-@* ===================================================================== *@
 <TelerikWindow @ref="LocInfoWindow"
                Modal="true"
                @bind-Visible="@WindowVisible"
-               Width="auto"
+               Width="400px"
                Height="auto"
                Resizable="false"
                Draggable="false"
                Class="user-card"
                CloseOnOverlayClick="true">
 
-    @* ===================================================================== *@
-    @* WINDOW HEADER - Dynamic title based on selected location             *@
-    @* ===================================================================== *@
     <WindowTitle>
         @if (SelectedLocation != null)
         {
@@ -43,91 +29,125 @@
         }
     </WindowTitle>
 
-    @* Window control buttons (close button) *@
     <WindowActions>
         <WindowAction Name="Close" />
     </WindowActions>
 
-    @* ===================================================================== *@
-    @* WINDOW CONTENT - Location information display                        *@
-    @* ===================================================================== *@
     <WindowContent>
         @if (SelectedLocation != null)
         {
             <section>
                 <div>
-                    @* Basic location identification *@
                     <div class="card-row">
                         <label>Location Number:</label>
-                        <span>@SelectedLocation.LocNum</span>
+                        <TelerikTextBox Value="@SelectedLocation.LocNum.ToString()"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
-
-                    @* Address information section *@
                     <div class="card-row">
                         <label>Street Address:</label>
-                        <span>@SelectedLocation.Address</span>
+                        <TelerikTextBox Value="@SelectedLocation.Address"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
                     <div class="card-row">
                         <label>City:</label>
-                        <span>@SelectedLocation.City</span>
+                        <TelerikTextBox Value="@SelectedLocation.City"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
                     <div class="card-row">
                         <label>State:</label>
-                        <span>@SelectedLocation.State</span>
+                        <TelerikTextBox Value="@SelectedLocation.State"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
                     <div class="card-row">
                         <label>Zipcode:</label>
-                        <span>@SelectedLocation.Zipcode</span>
+                        <TelerikTextBox Value="@SelectedLocation.Zipcode"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
-
-                    @* Contact information section *@
                     <div class="card-row">
                         <label>Phone Number:</label>
-                        <span>@SelectedLocation.PhoneNumber</span>
+                        @if (SelectedLocation.PhoneNumber != null)
+                        {
+                            <FormatPhone PhoneNumber="@SelectedLocation.PhoneNumber" PhoneNumClass="bold-phone" />
+                        }
+                        else
+                        {
+                            <TelerikTextBox Value=""
+                                            ReadOnly="true"
+                                            FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                            Width="100%" />
+                        }
                     </div>
                     <div class="card-row">
                         <label>Fax or Alt. Number:</label>
-                        <span>@SelectedLocation.FaxNumber</span>
+                        @if (SelectedLocation.FaxNumber != null)
+                        {
+                            <FormatPhone PhoneNumber="@SelectedLocation.FaxNumber" PhoneNumClass="bold-phone" />
+                        }
+                        else
+                        {
+                            <TelerikTextBox Value=""
+                                            ReadOnly="true"
+                                            FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                            Width="100%" />
+                        }
                     </div>
                     <div class="card-row">
                         <label>Email:</label>
-                        <span>@SelectedLocation.Email</span>
+                        <TelerikTextBox Value="@SelectedLocation.Email"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
-
-                    @* Operating information section *@
                     <div class="card-row">
                         <label>Hours:</label>
-                        <span>@SelectedLocation.Hours</span>
+                        <TelerikTextBox Value="@SelectedLocation.Hours"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
-
                     <div class="card-row">
                         <label>Location Type:</label>
-                        <span>@SelectedLocation.Loctype.GetDisplayName()</span>
+                        <TelerikTextBox Value="@SelectedLocation.Loctype.GetDisplayName()"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
-
-                    @* Management information section *@
                     <div class="card-row">
                         <label>Location Manager:</label>
-                        <span>@SelectedLocation.StoreManager</span>
+                        <TelerikTextBox Value="@SelectedLocation.StoreManager"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
                     <div class="card-row">
                         <label>Area Manager:</label>
-                        <span>@SelectedLocation.AreaManager</span>
+                        <TelerikTextBox Value="@SelectedLocation.AreaManager"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
-
-                    @* Record metadata *@
                     <div class="card-row">
                         <label>Location Added:</label>
-                        <span>@SelectedLocation.RecordAdd?.ToString("MM/dd/yyy")</span>
+                        <TelerikTextBox Value="@(SelectedLocation.RecordAdd?.ToString("MM/dd/yyyy"))"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
                 </div>
             </section>
         }
     </WindowContent>
 
-    @* ===================================================================== *@
-    @* WINDOW FOOTER - Action buttons                                        *@
-    @* ===================================================================== *@
     <WindowFooter>
         <TelerikButton OnClick="() => WindowVisible = false"
                        ThemeColor="primary">
@@ -137,151 +157,98 @@
 
 </TelerikWindow>
 
-@* ===================================================================== *@
-@* COMPONENT STYLES - Custom CSS for location details display            *@
-@* ===================================================================== *@
 <style>
-    /* Label styling for data field names */
-    label {
-        padding: 8px 6px 6px 8px; /* Internal spacing */
-        margin-bottom: 15px; /* Space below labels */
-        font-weight: 500; /* Medium font weight */
-        font-size: 0.9em; /* Slightly smaller text */
-        text-transform: uppercase; /* All caps for consistency */
-        background-color: var(--kendo-color-primary); /* Primary theme color */
-        color: white; /* White text for contrast */
+    .bold-phone {
+        font-weight: 700;
+        display: inline-flex;
+        padding: 0;
     }
 
     section {
         padding: 4px;
     }
 
-    /* Main container styling */
     .user-card {
-        /* padding: 5px; */ /* Commented out padding */
-        /* border-radius: 16px 16px 16px 16px; */ /* Commented out rounded corners */
-        /* border: 0px solid; */ /* Commented out border */
         width: auto;
         height: auto;
         margin: 10px;
     }
 
-        /* Data value styling */
-        .user-card span {
-            font-weight: 600; /* Semi-bold for emphasis */
-            padding: 3px 5px; /* Internal padding */
-            font-size: 1em; /* Standard font size */
-            /* background-color: transparent;  */
+        .user-card .k-input.k-readonly {
+            font-weight: 600;
+            font-size: 1em;
         }
 
-        /* Window title bar action buttons styling */
         .user-card .k-window-titlebar-actions {
-            background-color: var(--kendo-color-primary-emphasis); /* Emphasized primary color */
+            background-color: var(--kendo-color-primary-emphasis);
         }
 
     .k-actions {
         background: var(--kendo-color-primary);
     }
 
-    /* Individual data row styling */
     .card-row {
-        padding: 6px 0; /* Vertical padding */
-        margin: 2px;
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        padding: 0;
+        margin: 8px;
         border: solid 1px;
-        /* border-bottom: dashed 1px; 
-        border-left: 0.25px; 
-        border-right: 0.25px;  */
-        border-color: var(--kendo-color-primary); 
-        /* border: solid; */ /* Commented out solid border */
-        /* border-top: dashed 1px; */ /* Commented out top border */
-        /* background: inherit; */ /* Commented out background */
-        /* background-color: var(--kendo-color-); */ /* Commented out background color */
+        border-color: var(--kendo-color-primary);
     }
+
+        .card-row label {
+            padding: 8px 10px;
+            margin-bottom: 0;
+            font-weight: 500;
+            font-size: 0.82em;
+            text-transform: uppercase;
+            background-color: var(--kendo-color-primary);
+            color: white;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            min-width: 120px;
+        }
+
+        .card-row .k-input.k-input-flat {
+            flex: 1;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+            .card-row .k-input.k-input-flat .k-input-inner {
+                font-weight: 600;
+                font-size: 1em;
+                padding: 4px 8px;
+            }
 </style>
 
 @code {
-    // =====================================================================
-    // COMPONENT STATE PROPERTIES
-    // =====================================================================
-
-    /// <summary>
-    /// Controls the visibility of the location details modal window
-    /// </summary>
     private bool WindowVisible { get; set; }
-
-    /// <summary>
-    /// The currently selected location to display details for
-    /// </summary>
     private Location? SelectedLocation { get; set; }
-
-    /// <summary>
-    /// List of locations (currently unused but available for future expansion)
-    /// </summary>
-    private List<Location> locations { get; set; } = new List<Location>();
-
-    /// <summary>
-    /// Reference to the Telerik Window component for programmatic control
-    /// </summary>
     private TelerikWindow? LocInfoWindow { get; set; }
 
-    // =====================================================================
-    // COMPONENT PARAMETERS - Input properties from parent components
-    // =====================================================================
-
-    /// <summary>
-    /// List of departments passed from parent component
-    /// Currently used for potential department-location relationships
-    /// </summary>
     [Parameter]
     public List<Department> Departments { get; set; } = new();
 
-    // /// <summary>
-    // /// Stores the selected location type value for processing
-    // /// </summary>
-    // private int LocTypeValue { get; set; }
-
-    // =====================================================================
-    // PUBLIC METHODS - Called by parent components
-    // =====================================================================
-
-    /// <summary>
-    /// Opens the location details modal for the specified location
-    /// This method is called by parent components to show location details
-    /// </summary>
-    /// <param name="location">The location object to display details for</param>
     public void ShowLocationInfo(Location location)
     {
         SelectedLocation = location;
         WindowVisible = true;
-        StateHasChanged(); // Trigger UI refresh to show modal
+        StateHasChanged();
     }
 
-    // =====================================================================
-    // PRIVATE UTILITY METHODS
-    // =====================================================================
-
-    /// <summary>
-    /// Generates a dynamic window title based on the selected location
-    /// Includes location name and number for clear identification
-    /// </summary>
-    /// <returns>Formatted title string</returns>
     private string GetWindowTitle()
     {
         return SelectedLocation != null
             ? $"{SelectedLocation.LocName} {SelectedLocation.LocNum} - Details"
-            : "Employee Information"; // Fallback title (note: should probably be "Location Information")
+            : "Location Information";
     }
 
-    /// <summary>
-    /// Simple method to open the modal window
-    /// Alternative to direct property setting
-    /// </summary>
     private void OpenWindow()
     {
         WindowVisible = true;
     }
-
-    // location.Loctype.GetDisplayName()
-
-    
 }

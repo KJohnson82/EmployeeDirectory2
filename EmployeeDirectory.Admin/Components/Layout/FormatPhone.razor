@@ -1,0 +1,24 @@
+﻿
+<TelerikMaskedTextBox Value="@PhoneNumber"
+                      Mask="(000) 000-0000"
+                      Placeholder="(000) 000-0000"
+                      Class="@PhoneNumClass"
+                      ReadOnly="true"
+                      Enabled="true" />
+
+
+@code {
+    [Parameter]
+    public string? PhoneNumber { get; set; }
+
+    [Parameter]
+    public string? PhoneNumClass { get; set; }
+}
+
+<style>
+    /* .inline-phone {
+        display: inline-flex;
+        padding: 0;
+        
+    } */
+</style>

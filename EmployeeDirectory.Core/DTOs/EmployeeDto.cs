@@ -16,6 +16,7 @@ namespace EmployeeDirectory.Core.DTOs
         public bool IsManager { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public string? CellNumber { get; set; }
+        public string? AltNumber { get; set; }
         public string? Extension { get; set; }
         public string Email { get; set; } = string.Empty;
         public string? NetworkId { get; set; }

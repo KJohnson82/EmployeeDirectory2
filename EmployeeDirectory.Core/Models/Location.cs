@@ -37,10 +37,16 @@ public partial class Location
     public string? Zipcode { get; set; }
 
     [StringLength(15)]
+    [Phone]
     public string? PhoneNumber { get; set; }
 
     [StringLength(15)]
+    [Phone]
     public string? FaxNumber { get; set; }
+
+    [StringLength(15)]
+    [Phone]
+    public string? AltNumber { get; set; }
 
     [Column("Email")]
     [EmailAddress]

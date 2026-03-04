@@ -93,10 +93,30 @@
                 </Template>
             </GridColumn>
 
-            <GridColumn Field="PhoneNumber" Title="Phone #" Filterable="false" Sortable="false" Visible="false" />
-            <GridColumn Field="CellNumber" Title="Alt #" Filterable="false" Sortable="false" Visible="false" />
-            <GridColumn Field="Extension" Width="75px" Title="Ext" Filterable="false" Sortable="false" />
-            <GridColumn Field="Email" Title="Email" Sortable="false" Visible="false" />
+            @* <GridColumn Field="PhoneNumber" Title="Phone #" Filterable="false" Sortable="false" Visible="false" /> *@
+            <GridColumn Field="PhoneNumber" Title="Phone #" Filterable="false" Sortable="false" Visible="false">
+                <EditorTemplate>
+                    @{
+                        var employee = (Employee)context;
+                    }
+                    <TelerikMaskedTextBox @bind-Value="@employee.PhoneNumber"
+                                          Mask="(000) 000-0000"
+                                          Placeholder="(000) 000-0000" />
+                </EditorTemplate>
+            </GridColumn>
+            <GridColumn Field="CellNumber" Title="Cell #" Filterable="false" Sortable="false" Visible="false">
+                <EditorTemplate>
+                    @{
+                        var employee = (Employee)context;
+                    }
+                    <TelerikMaskedTextBox @bind-Value="@employee.CellNumber"
+                                          Mask="(000) 000-0000"
+                                          Placeholder="(000) 000-0000" />
+                </EditorTemplate>
+            </GridColumn>
+            @* <GridColumn Field="CellNumber" Title="Alt #" Filterable="false" Sortable="false" Visible="false" /> *@
+            <GridColumn Field="Extension" Width="75px" Title="Ext" Filterable="false" Sortable="false"  />
+            <GridColumn Field="Email" Title="Email" Sortable="false" Visible="false" DisplayFormat="" />
 
             <GridColumn Field="NetworkId" Title="Network Id" Sortable="false" />
 

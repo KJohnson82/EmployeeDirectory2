@@ -1,10 +1,4 @@
-﻿@* ===================================================================== *@
-@* DEPARTMENT DETAILS MODAL COMPONENT                                    *@
-@* Displays comprehensive department information in a popup window       *@
-@* ===================================================================== *@
-
-@* Import necessary namespaces for Entity Framework, Telerik components, and data models *@
-@using EmployeeDirectory.Core.Data.Context
+﻿@using EmployeeDirectory.Core.Data.Context
 @using EmployeeDirectory.Core.Models
 @using Microsoft.EntityFrameworkCore
 @using Telerik.Blazor
@@ -16,26 +10,18 @@
 @using Telerik.DataSource
 @using Telerik.DataSource.Extensions
 
-
-@* Inject database context for data access *@
 @inject AppDbContext dbContext
 
-@* ===================================================================== *@
-@* MODAL WINDOW CONTAINER                                                *@
-@* ===================================================================== *@
 <TelerikWindow @ref="DeptInfoWindow"
                Modal="true"
                @bind-Visible="@WindowVisible"
-               Width="auto"
+               Width="400px"
                Height="auto"
                Resizable="false"
                Draggable="false"
                Class="user-card"
                CloseOnOverlayClick="true">
 
-    @* ===================================================================== *@
-    @* WINDOW HEADER - Department name as dynamic title                     *@
-    @* ===================================================================== *@
     <WindowTitle>
         @if (SelectedDepartment != null)
         {
@@ -43,62 +29,76 @@
         }
     </WindowTitle>
 
-    @* Window control buttons (close button) *@
     <WindowActions>
         <WindowAction Name="Close" />
     </WindowActions>
 
-    @* ===================================================================== *@
-    @* WINDOW CONTENT - Department information display                      *@
-    @* ===================================================================== *@
     <WindowContent>
         @if (SelectedDepartment != null)
         {
             <section>
                 <div>
-                    @* Location information - uses Entity Framework navigation property *@
                     <div class="card-row">
                         <label>Department Location:</label>
-                        <span>@SelectedDepartment.DeptLocation?.LocName</span>
+                        <TelerikTextBox Value="@SelectedDepartment.DeptLocation?.LocName"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
-
-                    @* Management information section *@
                     <div class="card-row">
                         <label>Department Manager:</label>
-                        <span>@SelectedDepartment.DeptManager</span>
+                        <TelerikTextBox Value="@SelectedDepartment.DeptManager"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
-
-                    @* Contact information section *@
                     <div class="card-row">
                         <label>Phone Number:</label>
-                        <span>@SelectedDepartment.DeptPhone</span>
+                        @if (SelectedDepartment.DeptPhone != null)
+                        {
+                            <FormatPhone PhoneNumber="@SelectedDepartment.DeptPhone" PhoneNumClass="bold-phone" />
+                        }
+                        else
+                        {
+                            <TelerikTextBox Value=""
+                                            ReadOnly="true"
+                                            FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                            Width="100%" />
+                        }
                     </div>
                     <div class="card-row">
                         <label>Department Fax:</label>
-                        <span>@SelectedDepartment.DeptFax</span>
+                        @if (SelectedDepartment.DeptFax != null)
+                        {
+                            <FormatPhone PhoneNumber="@SelectedDepartment.DeptFax" PhoneNumClass="bold-phone" />
+                        }
+                        else
+                        {
+                            <TelerikTextBox Value=""
+                                            ReadOnly="true"
+                                            FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                            Width="100%" />
+                        }
                     </div>
                     <div class="card-row">
                         <label>Department Email:</label>
-                        <span>@SelectedDepartment.DeptEmail</span>
+                        <TelerikTextBox Value="@SelectedDepartment.DeptEmail"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
-
-                    @* Record metadata - previous version commented out *@
-                    @* <div class="card-row">
-                        <label>Record Added:</label>
-                        <span>@SelectedDepartment.RecordAdd</span>
-                    </div> *@
                     <div class="card-row">
                         <label>Department Added:</label>
-                        <span>@SelectedDepartment.RecordAdd?.ToString("MM/dd/yyy")</span>
+                        <TelerikTextBox Value="@(SelectedDepartment.RecordAdd?.ToString("MM/dd/yyyy"))"
+                                        ReadOnly="true"
+                                        FillMode="@Telerik.Blazor.ThemeConstants.TextBox.FillMode.Flat"
+                                        Width="100%" />
                     </div>
                 </div>
             </section>
         }
     </WindowContent>
 
-    @* ===================================================================== *@
-    @* WINDOW FOOTER - Action buttons                                        *@
-    @* ===================================================================== *@
     <WindowFooter>
         <TelerikButton OnClick="() => WindowVisible = false"
                        ThemeColor="primary">
@@ -108,146 +108,96 @@
 
 </TelerikWindow>
 
-@* ===================================================================== *@
-@* COMPONENT STYLES - Custom CSS for department details display           *@
-@* ===================================================================== *@
 <style>
-    /* Label styling for data field names */
-    label {
-        padding: 8px 6px 6px 8px; /* Internal spacing */
-        margin-bottom: 15px; /* Space below labels */
-        font-weight: 500; /* Medium font weight */
-        font-size: 0.9em; /* Slightly smaller text */
-        text-transform: uppercase; /* All caps for consistency */
-        background-color: var(--kendo-color-primary); /* Primary theme color */
-        color: white; /* White text for contrast */
+    .bold-phone {
+        font-weight: 700;
+        display: inline-flex;
+        padding: 0;
     }
 
     section {
         padding: 4px;
     }
 
-    /* Main container styling */
     .user-card {
-        /* padding: 5px; */ /* Commented out padding */
-        /* border-radius: 16px 16px 16px 16px; */ /* Commented out rounded corners */
-        /* border: 0px solid; */ /* Commented out border */
         width: auto;
         height: auto;
         margin: 10px;
     }
 
-        /* Data value styling */
-        .user-card span {
-            font-weight: 600; /* Semi-bold for emphasis */
-            padding: 3px 5px; /* Internal padding */
-            font-size: 1em; /* Standard font size */
-            /* background-color: var(--kendo-color-light); */ /* Commented out background */
+        .user-card .k-input.k-readonly {
+            font-weight: 600;
+            font-size: 1em;
         }
 
-        /* Window title bar action buttons styling */
         .user-card .k-window-titlebar-actions {
-            background-color: var(--kendo-color-primary-emphasis); /* Emphasized primary color */
+            background-color: var(--kendo-color-primary-emphasis);
         }
 
-        .k-actions {
-            background: var(--kendo-color-primary);
-        }
-
-    /* Individual data row styling */
-    .card-row {
-        padding: 6px 0; /* Vertical padding */
-        margin: 2px;
-        /* border-bottom: dashed 1px; 
-        border-left: 0.25px; 
-        border-right: 0.25px;  */
-        border: solid 1px;
-        border-color: var(--kendo-color-primary); 
-        /* border: solid; */ /* Commented out solid border */
-        /* border-top: dashed 1px; */ /* Commented out top border */
-        /* background: inherit; */ /* Commented out background */
-        /* background-color: var(--kendo-color-); */ /* Commented out background color */
+    .k-actions {
+        background: var(--kendo-color-primary);
     }
+
+    .card-row {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        padding: 0;
+        margin: 8px;
+        border: solid 1px;
+        border-color: var(--kendo-color-primary);
+    }
+
+        .card-row label {
+            padding: 8px 10px;
+            margin-bottom: 0;
+            font-weight: 500;
+            font-size: 0.82em;
+            text-transform: uppercase;
+            background-color: var(--kendo-color-primary);
+            color: white;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            min-width: 120px;
+        }
+
+        .card-row .k-input.k-input-flat {
+            flex: 1;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+            .card-row .k-input.k-input-flat .k-input-inner {
+                font-weight: 600;
+                font-size: 1em;
+                padding: 4px 8px;
+            }
 </style>
 
 @code {
-    // =====================================================================
-    // COMPONENT STATE PROPERTIES
-    // =====================================================================
-
-    /// <summary>
-    /// Controls the visibility of the department details modal window
-    /// </summary>
     private bool WindowVisible { get; set; }
-
-    /// <summary>
-    /// The currently selected department to display details for
-    /// </summary>
     private Department? SelectedDepartment { get; set; }
-
-    /// <summary>
-    /// List of locations (currently unused but available for future expansion)
-    /// </summary>
-    private List<Location> locations { get; set; } = new List<Location>();
-
-    /// <summary>
-    /// List of departments (currently unused but available for future expansion)
-    /// </summary>
-    private List<Department> departments { get; set; } = new List<Department>();
-
-    /// <summary>
-    /// Reference to the Telerik Window component for programmatic control
-    /// </summary>
     private TelerikWindow? DeptInfoWindow { get; set; }
 
-    // =====================================================================
-    // COMPONENT PARAMETERS - Input properties from parent components
-    // =====================================================================
-
-    /// <summary>
-    /// List of locations passed from parent component
-    /// Note: Currently not actively used since department location is accessed
-    /// via Entity Framework navigation property (DeptLocation?.LocName)
-    /// </summary>
     [Parameter]
     public List<Location> Locations { get; set; } = new();
 
-    // =====================================================================
-    // PUBLIC METHODS - Called by parent components
-    // =====================================================================
-
-    /// <summary>
-    /// Opens the department details modal for the specified department
-    /// This method is called by parent components to show department details
-    /// </summary>
-    /// <param name="department">The department object to display details for</param>
     public void ShowDepartmentInfo(Department department)
     {
         SelectedDepartment = department;
         WindowVisible = true;
-        StateHasChanged(); // Trigger UI refresh to show modal
+        StateHasChanged();
     }
 
-    // =====================================================================
-    // PRIVATE UTILITY METHODS
-    // =====================================================================
-
-    /// <summary>
-    /// Generates a dynamic window title based on the selected department
-    /// Includes department name for clear identification
-    /// </summary>
-    /// <returns>Formatted title string</returns>
     private string GetWindowTitle()
     {
         return SelectedDepartment != null
             ? $"{SelectedDepartment.DeptName} - Details"
-            : "Department Information"; 
+            : "Department Information";
     }
 
-    /// <summary>
-    /// Simple method to open the modal window
-    /// Alternative to direct property setting
-    /// </summary>
     private void OpenWindow()
     {
         WindowVisible = true;

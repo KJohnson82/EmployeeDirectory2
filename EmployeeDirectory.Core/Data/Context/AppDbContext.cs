@@ -87,6 +87,7 @@ namespace EmployeeDirectory.Core.Data.Context
 
                 entity.Property(e => e.CellNumber).HasMaxLength(15);
                 entity.Property(e => e.Extension).HasMaxLength(10);
+                entity.Property(e => e.AltNumber).HasMaxLength(15);
                 entity.Property(e => e.NetworkId).HasMaxLength(30);
                 entity.Property(e => e.EmpAvatar).HasMaxLength(255);
 
@@ -136,6 +137,7 @@ namespace EmployeeDirectory.Core.Data.Context
 
                 entity.Property(e => e.PhoneNumber).HasMaxLength(15);
                 entity.Property(e => e.FaxNumber).HasMaxLength(15);
+                entity.Property(e => e.AltNumber).HasMaxLength(15);
                 entity.Property(e => e.Email).HasMaxLength(60);
                 entity.Property(e => e.Hours).HasMaxLength(50);
                 entity.Property(e => e.AreaManager).HasMaxLength(60);
