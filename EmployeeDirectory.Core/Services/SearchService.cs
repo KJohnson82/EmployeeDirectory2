@@ -177,7 +177,7 @@ public class SearchService : ISearchService
 
             // Load all active locations with location type information
             var allLocations = await _context.Locations
-                .Include(l => l.LocationType)     // Load location type for categorization
+                .Include(l => l.Loctype)     // Load location type for categorization
                 .Where(l => l.Active == true)     // Only include active locations
                 .ToListAsync();
 

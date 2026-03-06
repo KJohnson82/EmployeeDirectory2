@@ -22,7 +22,6 @@ public class DirectoryService : IDirectoryService
     {
         var location = await _context.Locations
             .Where(l => l.Active == true)
-            .Include(l => l.LocationType)
             .Include(l => l.Departments.Where(d => d.Active == true))
             .AsNoTracking()
             .FirstOrDefaultAsync(l => l.Id == locationId);
@@ -91,8 +90,7 @@ public class DirectoryService : IDirectoryService
     public async Task<List<LocationDto>> GetLocationsByTypeAsync(Loctype loctype)
     {
         var locations = await _context.Locations
-            .Where(l => l.Active == true)
-            //.Where(l => l.LocationType!.LoctypeName.ToLower() == loctypeName.ToLower())
+            .Where(l => l.Active == true && l.Loctype == loctype)
             .AsNoTracking()
             .ToListAsync();
 
@@ -126,7 +124,6 @@ public class DirectoryService : IDirectoryService
     {
         var location = await _context.Locations
             .Where(l => l.Active == true)
-            .Include(l => l.LocationType)
             .AsNoTracking()
             .FirstOrDefaultAsync(l => l.Id == id);
 

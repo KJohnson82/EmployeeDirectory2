@@ -3,6 +3,7 @@
   <Project Path="EmployeeDirectory.API/EmployeeDirectory.API.csproj" />
   <Project Path="EmployeeDirectory.AppHost/EmployeeDirectory.AppHost.csproj" />
   <Project Path="EmployeeDirectory.Core/EmployeeDirectory.Core.csproj" Id="b793f2c8-7830-4d70-8361-7594764b5d30" />
+  <Project Path="EmployeeDirectory.Desktop/EmployeeDirectory.Desktop.csproj" />
   <Project Path="EmployeeDirectory.ServiceDefaults/EmployeeDirectory.ServiceDefaults.csproj" />
   <Project Path="EmployeeDirectory.UI/EmployeeDirectory.UI.csproj" />
 </Solution>

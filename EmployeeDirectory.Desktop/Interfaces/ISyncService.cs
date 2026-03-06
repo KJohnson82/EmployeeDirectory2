@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EmployeeDirectory.Core.Services
+namespace EmployeeDirectory.Desktop.Interfaces
 {
     /// Service for syncing data from API to local cache
     /// Implemented in EmpDir.Desktop

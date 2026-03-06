@@ -29,4 +29,7 @@ var admin = builder.AddProject<Projects.EmployeeDirectory_Admin>("employeedirect
     .WithExternalHttpEndpoints();
 
 
+builder.AddProject<Projects.EmployeeDirectory_Desktop>("employeedirectory-desktop");
+
+
 builder.Build().Run();

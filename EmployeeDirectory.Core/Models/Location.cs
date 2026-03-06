@@ -72,5 +72,5 @@ public partial class Location
 
     public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
 
-    public virtual Loctype? LocationType { get; set; }
+    //public virtual Loctype? LocationType { get; set; }
 }
