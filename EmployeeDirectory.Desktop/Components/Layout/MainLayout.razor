@@ -1,3 +1,145 @@
 ﻿@inherits LayoutComponentBase
 
-@Body
+
+@using EmployeeDirectory.Desktop.Interfaces
+@using Microsoft.Extensions.Logging
+@using Telerik.Blazor.Components
+
+
+@implements IDisposable
+
+@inject NavigationManager NavigationManager
+@inject LayoutState LayoutState
+@* @inject ISyncService SyncService *@
+@inject ILogger<MainLayout> Logger
+
+@* Main layout structure with header, content, and footer *@
+<TelerikRootComponent>
+    <div class="main-layout-container">
+
+
+        <header class="main-layout-header">
+            @if (IsStoreSpecificPage())
+            {
+                <StoreTitleCard StoreInfo="GetStoreInfo()" />
+            }
+            else if (IsCorpPage())
+            {
+                <HeaderCard Info="LayoutState.HeaderInfo" />
+            }
+            else
+            {
+                <HeaderCard Info="LayoutState.HeaderInfo" />
+            }
+        </header>
+
+
+        <main class="main-layout-content no-scrollbar">
+            @Body
+        </main>
+
+
+        <footer class="main-layout-footer">
+            <FooterNav Items="LayoutState.FooterItems" />
+        </footer>
+    </div>
+</TelerikRootComponent>
+
+@code {
+    // Initialize component and subscribe to layout state changes
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     // Sync data from API to local cache on startup
+    //     try
+    //     {
+    //         Logger.LogInformation("Starting initial sync...");
+    //         var result = await SyncService.SyncOnLaunchAsync();
+
+    //         if (result.Success)
+    //         {
+    //             Logger.LogInformation("Sync completed: {Message} - {EmployeeCount} employees",
+    //                 result.Message, result.EmployeesUpdated);
+    //         }
+    //         else
+    //         {
+    //             Logger.LogWarning("Sync issue: {Message}", result.Message);
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Logger.LogError(ex, "Sync failed on startup");
+    //     }
+
+    //     LayoutState.OnChange += OnStateChanged;
+    // }
+
+    protected override void OnInitialized()
+    {
+        LayoutState.OnChange += OnStateChanged;
+    }
+
+    // Handle layout state changes and trigger UI re-render
+    private async void OnStateChanged()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    // Cleanup event subscriptions to prevent memory leaks
+    public void Dispose()
+    {
+        LayoutState.OnChange -= OnStateChanged;
+    }
+
+    // Check if current page is store-specific (MetalMart or Service Center)
+    private bool IsStoreSpecificPage()
+    {
+        var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        return relativePath.StartsWith("metalmart/", StringComparison.OrdinalIgnoreCase) ||
+               relativePath.StartsWith("servicecenter/", StringComparison.OrdinalIgnoreCase);
+    }
+
+    // Check if current page is corporate or home page
+    private bool IsCorpPage()
+    {
+        var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToLower();
+        return string.IsNullOrEmpty(relativePath) ||
+               relativePath == "home" ||
+               relativePath.StartsWith("corporate");
+    }
+
+    // Convert generic HeaderInfo to store-specific model
+    private StoreTitleCard.StoreTitleCardModel? GetStoreInfo()
+    {
+        if (LayoutState.HeaderInfo == null)
+            return null;
+
+        return new StoreTitleCard.StoreTitleCardModel
+        {
+            Title = LayoutState.HeaderInfo.Title ?? string.Empty,
+            StoreManager = LayoutState.HeaderInfo.StoreManager ?? string.Empty,
+            AreaManager = LayoutState.HeaderInfo.AreaManager ?? string.Empty
+        };
+    }
+}
+
+<style>
+    .main-layout-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    .main-layout-header {
+        flex-shrink: 0;
+    }
+
+    .main-layout-footer {
+        flex-shrink: 0;
+    }
+
+    .main-layout-content {
+        flex: 1;
+        overflow-y: hidden;
+        min-height: 0;
+    }
+</style>

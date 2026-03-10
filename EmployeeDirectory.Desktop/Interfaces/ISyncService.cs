@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace EmployeeDirectory.Desktop.Interfaces
 {
     /// Service for syncing data from API to local cache
-    /// Implemented in EmpDir.Desktop
+
     public interface ISyncService
     {
         /// Perform full sync from API to cache (called on app launch)

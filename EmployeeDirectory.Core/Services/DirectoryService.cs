@@ -7,8 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EmployeeDirectory.Core.Services;
 
-/// Implementation of IDirectoryService using Entity Framework Core
-/// Used by: EmpDir.Api and EmpDir.Admin (direct database access)
 public class DirectoryService : IDirectoryService
 {
     private readonly AppDbContext _context;

@@ -1,4 +1,5 @@
 ﻿using EmployeeDirectory.Core.Services;
+using EmployeeDirectory.Desktop.Components.Layout;
 using EmployeeDirectory.Desktop.Data;
 using EmployeeDirectory.Desktop.Interfaces;
 using EmployeeDirectory.Desktop.Services;
@@ -20,6 +21,7 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             });
 
+        // ===== BLAZOR =====
         builder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
@@ -28,17 +30,27 @@ public static class MauiProgram
 #endif
 
         // ===== CONFIGURATION =====
-        var config = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-#if DEBUG
-            .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
-#else
-    .AddJsonFile("appsettings.Production.json", optional: true, reloadOnChange: true)
-#endif
-            .Build();
+        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+        var configBuilder = new ConfigurationBuilder();
 
-        builder.Configuration.AddConfiguration(config);
+        using var appSettingsStream = assembly.GetManifestResourceStream(
+            "EmployeeDirectory.Desktop.appsettings.json");
+        if (appSettingsStream != null)
+            configBuilder.AddJsonStream(appSettingsStream);
+
+#if DEBUG
+        using var devStream = assembly.GetManifestResourceStream(
+            "EmployeeDirectory.Desktop.appsettings.Development.json");
+        if (devStream != null)
+            configBuilder.AddJsonStream(devStream);
+#else
+        using var prodStream = assembly.GetManifestResourceStream(
+            "EmployeeDirectory.Desktop.appsettings.Production.json");
+        if (prodStream != null)
+            configBuilder.AddJsonStream(prodStream);
+#endif
+
+        builder.Configuration.AddConfiguration(configBuilder.Build());
 
         // ===== TELERIK BLAZOR =====
         builder.Services.AddTelerikBlazor();
@@ -58,13 +70,14 @@ public static class MauiProgram
         });
 
         // ===== SERVICES =====
+        builder.Services.AddSingleton<LayoutState>();
         builder.Services.AddSingleton<IApiService, ApiService>();
         builder.Services.AddSingleton<ICacheService, CacheService>();
         builder.Services.AddSingleton<ISyncService, SyncService>();
         builder.Services.AddScoped<IDirectoryService, CachedDirectoryService>();
         builder.Services.AddScoped<ISearchService, CachedSearchService>();
 
-        // ===== INITIALIZE DATABASE =====
+        // ===== BUILD & INITIALIZE DATABASE =====
         var app = builder.Build();
 
         using (var scope = app.Services.CreateScope())
