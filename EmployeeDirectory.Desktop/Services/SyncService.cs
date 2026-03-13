@@ -33,6 +33,18 @@ namespace EmployeeDirectory.Desktop.Services
 
         public async Task<SyncResult> SyncOnLaunchAsync()
         {
+            var apiAvailable = false;
+            for (int attempt = 1; attempt <= 10; attempt++)
+            {
+                apiAvailable = await _apiService.HealthCheckAsync();
+                if (apiAvailable)
+                {
+                    _logger.LogInformation("API available on attempt {Attempt}", attempt);
+                    break;
+                }
+                _logger.LogInformation("API not ready, attempt {Attempt}/10, waiting...", attempt);
+                await Task.Delay(2000);
+            }
             var result = new SyncResult
             {
                 SyncTime = DateTime.UtcNow
@@ -48,14 +60,14 @@ namespace EmployeeDirectory.Desktop.Services
                     return result;
                 }
                 var directoryData = await _apiService.GetFullDirectoryAsync();
-                var employees = directoryData.Employees.Select(dto => dto.ToModel()).ToList();
-                var departments = directoryData.Departments.Select(dto => dto.ToModel()).ToList();
                 var locations = directoryData.Locations.Select(dto => dto.ToModel()).ToList();
+                var departments = directoryData.Departments.Select(dto => dto.ToModel()).ToList();
+                var employees = directoryData.Employees.Select(dto => dto.ToModel()).ToList();
 
                 await _cacheService.ClearAllDataAsync();
-                await _cacheService.SaveEmployeesAsync(employees);
-                await _cacheService.SaveDepartmentsAsync(departments);
                 await _cacheService.SaveLocationsAsync(locations);
+                await _cacheService.SaveDepartmentsAsync(departments);
+                await _cacheService.SaveEmployeesAsync(employees);
                 _lastSyncTime = DateTime.UtcNow;
                 result.Success = true;
                 result.Message = "Data synced successfully.";

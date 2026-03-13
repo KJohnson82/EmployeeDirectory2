@@ -26,7 +26,7 @@ namespace EmployeeDirectory.Desktop.Services
             try
             {
                 var client = _httpClientFactory.CreateClient("EmployeeDirectoryApi");
-                var response = await client.GetAsync("/api/directory/full");
+                var response = await client.GetAsync("/api/directory/sync");
                 if (response.IsSuccessStatusCode)
                 {
                     var content = await response.Content.ReadAsStringAsync();
@@ -54,7 +54,7 @@ namespace EmployeeDirectory.Desktop.Services
             try
             {
                 var client = _httpClientFactory.CreateClient("EmployeeDirectoryApi");
-                var response = await client.GetAsync("/api/health");
+                var response = await client.GetAsync("/health");
                 return response.IsSuccessStatusCode;
             }
             catch (Exception ex)

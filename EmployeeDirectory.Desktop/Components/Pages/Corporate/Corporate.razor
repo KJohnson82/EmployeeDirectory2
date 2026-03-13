@@ -26,7 +26,7 @@ else
             <TelerikListView Data="@Departments" EnableLoaderContainer="true" Class="button-list-container">
                 <Template Context="dept">
                     <NavLink href="@($"/corporate/{dept.Id}")" class="k-text-no-underline k-shadow">
-                        <div class="menu-item rounded-3 k-d-flex k-flex-row k-text-uppercase k-font-size-lg k-font-semibold k-text-white k-justify-content-start k-align-items-center k-pl-10 k-bg-gradient k-py-6 hover:k-elevation-2">
+                        <div class="menu-item rounded-3 k-d-flex k-flex-row k-text-uppercase k-font-size-lg k-font-semibold k-text-white k-justify-content-end k-align-items-center k-pl-10 k-bg-gradient k-py-6 hover:k-elevation-2">
                             @dept.DeptName
                         </div>
                     </NavLink>
@@ -36,51 +36,6 @@ else
     </div>
 }
 
-<style>
-    .menu-item {
-        background-color: #ff6358;
-        margin: 8px 10px;
-        border-radius: 0.75rem;
-        flex: 1;
-        letter-spacing: 0.5px;
-    }
-
-        .menu-item:hover {
-            transition: transform 0.2s ease-in, opacity 0.2s ease-in;
-            transform: translateY(0) scale(0.95);
-            background-color: #FA574B;
-        }
-
-    .button-page-container {
-        height: calc(100% - 60px);
-        display: flex;
-        flex-direction: column;
-        background-color: var(--kendo-color-secondary-emphasis);
-    }
-
-    .button-list-container {
-        background-color: transparent !important;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        margin: 1px 0;
-        padding: 2px 0;
-        overflow-y: auto;
-    }
-
-    .scrollable-wrapper {
-        flex: 1;
-        overflow-y: auto;
-        margin: 1px 0;
-        padding: 0px 0;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-    }
-
-        .scrollable-wrapper::-webkit-scrollbar {
-            display: none;
-        }
-</style>
 
 @code {
     // Corporate departments loaded from database

@@ -28,6 +28,27 @@ public class LocalCacheContext : DbContext
                 .IsRequired();
         });
 
+        modelBuilder.Entity<Department>(entity =>
+        {
+            entity.HasOne(d => d.DeptLocation)
+                .WithMany(l => l.Departments)
+                .HasForeignKey(d => d.Location)
+                .IsRequired(false);
+        });
+
+        modelBuilder.Entity<Employee>(entity =>
+        {
+            entity.HasOne(e => e.EmpDepartment)
+                .WithMany(d => d.Employees)
+                .HasForeignKey(e => e.Department)
+                .IsRequired(false);
+
+            entity.HasOne(e => e.EmpLocation)
+                .WithMany(l => l.Employees)
+                .HasForeignKey(e => e.Location)
+                .IsRequired(false);
+        });
+
         modelBuilder.Entity<SyncMetadata>(entity =>
         {
             entity.ToTable("SyncMetadata");

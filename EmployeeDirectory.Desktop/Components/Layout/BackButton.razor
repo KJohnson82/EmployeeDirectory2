@@ -2,8 +2,9 @@
 @using Microsoft.JSInterop
 @using Telerik.Blazor
 @using Telerik.Blazor.Components
+@using EmployeeDirectory.Desktop
 
-
+@inject NavigationManager Navigation
 @inject IJSRuntime JS
 
 <TelerikButton OnClick="@GoBack"
@@ -20,9 +21,38 @@
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
+    [Parameter]
+    public string? FallbackUrl { get; set; } = "/";
+
     // Navigate back using browser history via JavaScript interop
-    private async Task GoBack()
+    // private async Task GoBack()
+    // {
+    //     await JS.InvokeVoidAsync("goBack");
+    // }
+    private void GoBack()
     {
-        await JS.InvokeVoidAsync("goBack");
+        // Navigate based on current route hierarchy
+        var currentPath = Navigation.ToBaseRelativePath(Navigation.Uri);
+
+        if (string.IsNullOrEmpty(currentPath) || currentPath == "/")
+        {
+            // Already at home, nowhere to go
+            return;
+        }
+
+        // Go up one level in the URL path
+        var segments = currentPath.TrimEnd('/').Split('/');
+
+        if (segments.Length <= 1)
+        {
+            // At a top-level page, go home
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            // Remove last segment to go up one level
+            var parentPath = string.Join("/", segments.Take(segments.Length - 1));
+            Navigation.NavigateTo("/" + parentPath);
+        }
     }
 }

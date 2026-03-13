@@ -1,6 +1,7 @@
 ﻿@using Telerik.Blazor
 @using Telerik.Blazor.Components
 @* @inject EmployeeDirectory.Desktop.Components.Layout.SearchResultsModal SearchResultsModal *@
+@inject EmployeeDirectory.Core.Services.ISearchService SearchService
 
 @* Horizontal search bar with back button and search input *@
 <TelerikAppBar ThemeColor="@ThemeConstants.AppBar.ThemeColor.Inverse"

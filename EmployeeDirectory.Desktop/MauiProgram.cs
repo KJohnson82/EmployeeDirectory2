@@ -11,6 +11,7 @@ namespace EmployeeDirectory.Desktop;
 
 public static class MauiProgram
 {
+
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();
@@ -61,7 +62,7 @@ public static class MauiProgram
             options.UseSqlite($"Data Source={dbPath}"));
 
         // ===== HTTP CLIENT =====
-        var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7100";
+        var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7287";
 
         builder.Services.AddHttpClient("EmployeeDirectoryApi", client =>
         {
@@ -85,7 +86,7 @@ public static class MauiProgram
             var context = scope.ServiceProvider.GetRequiredService<LocalCacheContext>();
             context.Database.EnsureCreated();
         }
-
+        
         return app;
     }
 }

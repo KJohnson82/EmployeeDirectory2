@@ -1,4 +1,3 @@
-using Aspire.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -29,7 +28,7 @@ var admin = builder.AddProject<Projects.EmployeeDirectory_Admin>("employeedirect
     .WithExternalHttpEndpoints();
 
 
-builder.AddProject<Projects.EmployeeDirectory_Desktop>("employeedirectory-desktop");
+builder.AddProject<Projects.EmployeeDirectory_Desktop>("employeedirectory-desktop").WaitForStart(edapi);
 
 
 builder.Build().Run();
