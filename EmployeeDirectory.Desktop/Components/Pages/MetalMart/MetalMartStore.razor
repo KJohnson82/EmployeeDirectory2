@@ -7,24 +7,19 @@
 
 @inject IDirectoryService DirectoryService
 @inject NavigationManager NavigationManager
-@inject IJSRuntime JSRuntime
 @inject LayoutState LayoutState
 
 <PageTitle>Metal Mart Store</PageTitle>
 
-@* Loading state *@
 @if (Store == null)
 {
     <p>Loading store...</p>
 }
 else
 {
-    @* Store details with dark theme *@
-    <div class="button-page-container k-border-top-2 k-border-bottom-8 k-border-x-0 k-border-solid k-border-dark-subtle">
+    <div class="store-page-container">
         <div class="scrollable-wrapper">
             <div class="store-details">
-
-                @* Store number and hours - two-column layout *@
                 <div class="section">
                     <div class="two-column">
                         @if (Store.LocNum.HasValue)
@@ -34,9 +29,7 @@ else
                                 <div class="section-content">@Store.LocNum</div>
                             </div>
                         }
-
                         <div class="divider-vertical"></div>
-
                         @if (!string.IsNullOrWhiteSpace(Store.Hours))
                         {
                             <div class="column">
@@ -47,7 +40,6 @@ else
                     </div>
                 </div>
 
-                @* Address information *@
                 @if (!string.IsNullOrWhiteSpace(Store.Address))
                 {
                     <div class="section section-left">
@@ -59,7 +51,6 @@ else
                     </div>
                 }
 
-                @* Phone and fax - switches between two-column and single-column layout *@
                 @if (!string.IsNullOrWhiteSpace(Store.PhoneNumber) || !string.IsNullOrWhiteSpace(Store.FaxNumber))
                 {
                     <div class="section">
@@ -86,19 +77,18 @@ else
                             {
                                 <div class="section section-right">
                                     <div class="right-divider">PHONE</div>
-                                    <div class="section-content" style="text-align: end;">@Store.PhoneNumber</div>
+                                    <div class="section-content text-end">@Store.PhoneNumber</div>
                                 </div>
                             }
                         }
                     </div>
                 }
 
-                @* Email address *@
                 @if (!string.IsNullOrWhiteSpace(Store.Email))
                 {
                     <div class="section section-left">
                         <div class="left-divider">EMAIL</div>
-                        <div class="section-content section-content-email" style="text-align: start;">@Store.Email</div>
+                        <div class="section-content section-content-email">@Store.Email</div>
                     </div>
                 }
             </div>
@@ -106,64 +96,17 @@ else
     </div>
 }
 
-@code {
-    // Store ID from URL route parameter
-    [Parameter]
-    public int storeID { get; set; }
-
-    // Metal Mart store location entity with all store information
-    private LocationDto? Store;
-
-    // Header card model for store display
-    private HeaderCardModels.HeadInfoCardModel? StoreInfo;
-
-    private List<FooterNav.FooterItem> FooterNav => FooterNavigation.MetalMartSection;
-
-    // Load store data and configure header when parameters change
-    protected override async Task OnParametersSetAsync()
-    {
-        Store = await DirectoryService.GetLocationByIdAsync(Loctype.MetalMart, storeID);
-
-        if (Store != null)
-        {
-            // Create store header with name and management information
-            StoreInfo = HeaderCardModels.Store(
-                title: Store.LocName ?? "Metal Mart Store",
-                subtitle1: "Store Manager",
-                storemanager: Store.StoreManager ?? "",
-                subtitle2: "Area Manager",
-                areamanager: Store.AreaManager ?? ""
-            );
-        }
-    }
-
-    // Configure layout state with store header and footer
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender && StoreInfo != null)
-        {
-            LayoutState.SetHeader(StoreInfo);
-            LayoutState.SetFooter(FooterNavigation.MetalMartSection);
-        }
-    }
-}
-
 <style>
-    .store-details {
-        background-color: var(--kendo-color-dark);
-        padding: 30px 0;
-    }
-
-    .button-page-container {
+    .store-page-container {
         height: calc(100% - 60px);
         display: flex;
         flex-direction: column;
         background-color: var(--kendo-color-dark);
-        padding-bottom: 10px;
-        padding-top: 10px;
+        padding: 10px 0;
         margin: 0;
         color: var(--kendo-color-on-dark);
-        position: relative;
+        border-top: 2px solid var(--kendo-color-dark-subtle);
+        border-bottom: 8px solid var(--kendo-color-dark-subtle);
     }
 
     .scrollable-wrapper {
@@ -178,17 +121,22 @@ else
             display: none;
         }
 
+    .store-details {
+        background-color: var(--kendo-color-dark);
+        padding: 30px 0;
+    }
+
     .section {
         position: relative;
         margin-bottom: 15px;
     }
 
-    .section-right {
-        padding-right: 2rem !important;
-    }
-
     .section-left {
         padding-left: 2rem !important;
+    }
+
+    .section-right {
+        padding-right: 2rem !important;
     }
 
     .section-content {
@@ -202,6 +150,10 @@ else
         text-overflow: ellipsis;
     }
 
+    .text-end {
+        text-align: end;
+    }
+
     .two-column {
         display: flex;
         align-items: center;
@@ -211,6 +163,14 @@ else
         flex: 1;
     }
 
+        .column:first-child {
+            text-align: right;
+        }
+
+        .column:last-child {
+            text-align: left;
+        }
+
     .divider-vertical {
         width: 2.5px;
         height: 3rem;
@@ -218,21 +178,12 @@ else
         margin: 0 20px;
     }
 
-    .column:first-child {
-        text-align: right;
-    }
-
-    .column:last-child {
-        text-align: left;
-    }
-
     .address-text {
         line-height: 1.3;
     }
 
     .left-divider {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
+        padding: 0.5rem 0;
         display: flex;
         align-items: center;
         font-size: 1.125rem;
@@ -249,8 +200,7 @@ else
         }
 
     .right-divider {
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
+        padding: 0.5rem 0;
         display: flex;
         align-items: center;
         font-size: 1.125rem;
@@ -266,3 +216,37 @@ else
             margin-right: 1rem;
         }
 </style>
+
+@code {
+    [Parameter]
+    public int storeID { get; set; }
+
+    private LocationDto? Store;
+    private HeaderCardModels.HeadInfoCardModel? StoreInfo;
+    private List<FooterNav.FooterItem> FooterNav => FooterNavigation.MetalMartSection;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Store = await DirectoryService.GetLocationByIdAsync(Loctype.MetalMart, storeID);
+
+        if (Store != null)
+        {
+            StoreInfo = HeaderCardModels.Store(
+                title: Store.LocName ?? "Metal Mart Store",
+                subtitle1: "Store Manager",
+                storemanager: Store.StoreManager ?? "",
+                subtitle2: "Area Manager",
+                areamanager: Store.AreaManager ?? ""
+            );
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && StoreInfo != null)
+        {
+            LayoutState.SetHeader(StoreInfo);
+            LayoutState.SetFooter(FooterNavigation.MetalMartSection);
+        }
+    }
+}

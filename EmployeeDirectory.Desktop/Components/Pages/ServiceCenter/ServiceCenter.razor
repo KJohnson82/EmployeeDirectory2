@@ -7,28 +7,24 @@
 
 @inject IDirectoryService DirectoryService
 @inject NavigationManager NavigationManager
-@inject IJSRuntime JSRuntime
 @inject LayoutState LayoutState
 
 <PageTitle>Service Center</PageTitle>
 
-@* Loading state *@
 @if (Locations == null || Locations.Count == 0)
 {
     <p>Loading Service Centers...</p>
 }
 else
 {
-    @* Scrollable list of Service Center locations *@
     <div class="button-page-container">
         <div class="scrollable-wrapper">
             <TelerikListView Data="@Locations" Class="button-list-container">
                 <Template Context="loc">
-                    <NavLink class="text-decoration-none text-uppercase"
-                             href="@($"/servicecenter/{loc.Id}")">
-                        <div class="menu-item py-3 px-4 my-2 rounded-3 k-text-white tracking-wider k-font-size-lg" style="font-size: medium; font-weight: bold; letter-spacing: 2px;">
-                            <div class="k-align-items-center">@loc.LocName</div>
-                            <div class="k-color-dark k-font-bold k-font-size-sm">@loc.City, @loc.State</div>
+                    <NavLink class="nav-link-clean" href="@($"/servicecenter/{loc.Id}")">
+                        <div class="menu-item location-list-item">
+                            <div class="location-name">@loc.LocName</div>
+                            <div class="location-city">@loc.City, @loc.State</div>
                         </div>
                     </NavLink>
                 </Template>
@@ -37,24 +33,47 @@ else
     </div>
 }
 
+<style>
+    .nav-link-clean {
+        text-decoration: none;
+        text-transform: uppercase;
+    }
+
+    .location-list-item {
+        padding: 0.75rem 1rem;
+        margin: 0.5rem 0;
+        border-radius: 0.75rem;
+        color: white;
+        font-size: medium;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+
+    .button-list-container {
+        padding: 0 10px;
+    }
+
+    .location-name {
+        align-items: center;
+    }
+
+    .location-city {
+        color: var(--kendo-color-dark);
+        font-weight: bold;
+        font-size: small;
+    }
+</style>
+
 @code {
-    // Header model with Service Center area management hierarchy
     private HeaderCardModels.HeadInfoCardModel? StoreInfo;
-
-    // Service Center locations sorted alphabetically by name
     private List<LocationDto> Locations = new();
-
     private List<FooterNav.FooterItem> FooterNav => FooterNavigation.ServiceCenterSection;
 
-    // Load Service Center locations and configure area management header
     protected override async Task OnInitializedAsync()
     {
         Locations = await DirectoryService.GetLocationsByTypeAsync(Core.Enums.Loctype.ServiceCenter);
-
-        // Sort alphabetically by name (unlike Metal Mart which sorts by location number)
         Locations = Locations.OrderBy(l => l.LocName).ToList();
 
-        // Create header with area management hierarchy
         StoreInfo = HeaderCardModels.AreaManagers(
             title: "Service Center",
             subtitle1: "Area Manager",
@@ -72,7 +91,6 @@ else
         );
     }
 
-    // Configure layout state with Service Center header and footer
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender && StoreInfo != null)

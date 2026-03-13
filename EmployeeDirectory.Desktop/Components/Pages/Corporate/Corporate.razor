@@ -1,32 +1,29 @@
 ﻿@page "/corporate"
+
 @using EmployeeDirectory.Desktop.Components
 @using EmployeeDirectory.Core.DTOs
 @using EmployeeDirectory.Core.Services
 @using EmployeeDirectory.Desktop.Components.Navigation
 @using Telerik.Blazor.Components
 
-@inject IJSRuntime JSRuntime
 @inject IDirectoryService DirectoryService
 @inject NavigationManager NavigationManager
 @inject LayoutState LayoutState
 
-
 <PageTitle>Corporate</PageTitle>
 
-@* Loading state *@
 @if (Departments == null || Departments.Count == 0)
 {
     <p>Loading corporate data...</p>
 }
 else
 {
-    @* Scrollable list of corporate departments *@
     <div class="button-page-container">
         <div class="scrollable-wrapper">
             <TelerikListView Data="@Departments" EnableLoaderContainer="true" Class="button-list-container">
                 <Template Context="dept">
-                    <NavLink href="@($"/corporate/{dept.Id}")" class="k-text-no-underline k-shadow">
-                        <div class="menu-item rounded-3 k-d-flex k-flex-row k-text-uppercase k-font-size-lg k-font-semibold k-text-white k-justify-content-end k-align-items-center k-pl-10 k-bg-gradient k-py-6 hover:k-elevation-2">
+                    <NavLink href="@($"/corporate/{dept.Id}")" class="nav-link-clean">
+                        <div class="menu-item menu-item-button">
                             @dept.DeptName
                         </div>
                     </NavLink>
@@ -36,28 +33,36 @@ else
     </div>
 }
 
+<style>
+    .nav-link-clean {
+        text-decoration: none;
+    }
+
+    .menu-item-button {
+        display: flex;
+        flex-direction: row;
+        text-transform: uppercase;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: white;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 1.5rem 2.5rem;
+        border-radius: 0.75rem;
+    }
+</style>
 
 @code {
-    // Corporate departments loaded from database
     private List<DepartmentDto>? Departments = new();
-
-    // Corporate location entity with related departments
     private LocationDto? corporate;
-
-    // Footer navigation items for corporate section
     private List<FooterNav.FooterItem> FooterNav => FooterNavigation.CorporateSection;
 
-    // Fetch corporate location and departments on page load
     protected override async Task OnInitializedAsync()
     {
-        // Corporate headquarters is location ID 1
         corporate = await DirectoryService.GetLocationWithDepartmentsAsync(1);
-
-        // Sort departments alphabetically
         Departments = corporate?.Departments.OrderBy(d => d.DeptName).ToList() ?? new List<DepartmentDto>();
     }
 
-    // Corporate header configuration with contact details
     private HeaderCardModels.HeadInfoCardModel CorporateHeadCard = new()
     {
         Title = "Corporate",
@@ -73,7 +78,6 @@ else
         Phone2 = "(866) 634-5111"
     };
 
-    // Configure layout state with corporate header and footer
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)

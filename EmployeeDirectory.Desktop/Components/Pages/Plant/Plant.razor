@@ -7,25 +7,22 @@
 
 @inject IDirectoryService DirectoryService
 @inject NavigationManager NavigationManager
-@inject IJSRuntime JSRuntime
 @inject LayoutState LayoutState
 
 <PageTitle>Plants</PageTitle>
 
-@* Loading state *@
 @if (Plants == null || Plants.Count == 0)
 {
     <p>Loading plant data...</p>
 }
 else
 {
-    @* Scrollable list of manufacturing plant locations *@
     <div class="button-page-container">
         <div class="scrollable-wrapper">
             <TelerikListView Data="@Plants" EnableLoaderContainer="true" Class="button-list-container">
                 <Template Context="plant">
-                    <NavLink href="@($"/plant/{plant.Id}")" class="link-body-emphasis k-text-no-underline k-shadow">
-                        <div class="menu-item k-d-flex k-flex-row k-text-uppercase k-font-size-lg k-font-semibold k-text-white k-justify-content-start k-align-items-center k-pl-10 k-bg-gradient k-py-6 hover:k-elevation-2">
+                    <NavLink href="@($"/plant/{plant.Id}")" class="nav-link-clean">
+                        <div class="menu-item menu-item-button">
                             @plant.LocName
                         </div>
                     </NavLink>
@@ -35,24 +32,35 @@ else
     </div>
 }
 
+<style>
+    .nav-link-clean {
+        text-decoration: none;
+    }
+
+    .menu-item-button {
+        display: flex;
+        flex-direction: row;
+        text-transform: uppercase;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: white;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 1.5rem 2.5rem;
+        border-radius: 0.75rem;
+    }
+</style>
+
 @code {
-    // Manufacturing plant locations sorted alphabetically
     private List<LocationDto>? Plants = new();
-
-    // Header model with manufacturing and operations management hierarchy
     private HeaderCardModels.HeadInfoCardModel? PlantInfo;
-
     private List<FooterNav.FooterItem> FooterNav => FooterNavigation.PlantSection;
 
-    // Load plant locations and configure management hierarchy header
     protected override async Task OnInitializedAsync()
     {
         Plants = await DirectoryService.GetLocationsByTypeAsync(Core.Enums.Loctype.Plant);
-
-        // Sort alphabetically for intuitive navigation
         Plants = Plants.OrderBy(p => p.LocName).ToList();
 
-        // Create header with manufacturing and operations management hierarchy
         PlantInfo = HeaderCardModels.Plant(
             title: "Plants",
             subtitle1: "Corp Manuf. Mgr",
@@ -70,7 +78,6 @@ else
         );
     }
 
-    // Configure layout state with plant header and footer
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender && PlantInfo != null)

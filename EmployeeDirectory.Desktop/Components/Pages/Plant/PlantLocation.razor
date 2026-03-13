@@ -11,20 +11,18 @@
 
 <PageTitle>Plant Location</PageTitle>
 
-@* Loading state *@
 @if (Plant == null)
 {
     <p>Loading location...</p>
 }
 else
 {
-    @* Scrollable list of plant departments *@
     <div class="button-page-container">
         <div class="scrollable-wrapper">
             <TelerikListView Data="@Departments" EnableLoaderContainer="true" Class="button-list-container">
                 <Template Context="dept">
-                    <NavLink href="@($"/plant/{locationID}/{dept.Id}")" class="link-body-emphasis k-text-no-underline k-shadow">
-                        <div class="menu-item k-d-flex k-flex-row k-text-uppercase k-font-size-lg k-font-semibold k-text-white k-justify-content-start k-align-items-center k-pl-10 k-bg-gradient k-py-6 hover:k-elevation-2">
+                    <NavLink href="@($"/plant/{locationID}/{dept.Id}")" class="nav-link-clean">
+                        <div class="menu-item menu-item-button">
                             @dept.DeptName
                         </div>
                     </NavLink>
@@ -34,40 +32,48 @@ else
     </div>
 }
 
+<style>
+    .nav-link-clean {
+        text-decoration: none;
+    }
+
+    .menu-item-button {
+        display: flex;
+        flex-direction: row;
+        text-transform: uppercase;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: white;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 1.5rem 2.5rem;
+        border-radius: 0.75rem;
+    }
+</style>
+
 @code {
-    // Plant location ID from URL route parameter
     [Parameter]
     public int locationID { get; set; }
 
-    // Manufacturing plant location entity with all plant information
     private LocationDto? Plant;
-
-    // Departments within the plant, sorted alphabetically
     private List<DepartmentDto> Departments = new();
-
-    // Header card model for plant location display
     private HeaderCardModels.HeadInfoCardModel? PlantLocationInfo;
-
     private List<FooterNav.FooterItem> FooterNav => FooterNavigation.PlantSection;
 
-    // Load plant location and departments, configure header
     protected override async Task OnParametersSetAsync()
     {
         Plant = await DirectoryService.GetLocationWithDepartmentsAsync(locationID);
 
         if (Plant != null)
         {
-            // Sort departments alphabetically for consistent presentation
             Departments = Plant.Departments.OrderBy(d => d.DeptName).ToList();
 
-            // Create header with plant name
             PlantLocationInfo = HeaderCardModels.Employee(
                 title: Plant.LocName ?? "Plant Location"
             );
         }
     }
 
-    // Configure layout state with plant header and footer
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender && PlantLocationInfo != null)

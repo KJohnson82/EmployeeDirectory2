@@ -1,46 +1,43 @@
 ﻿@page "/corporate/{departmentID:int}"
+
 @using EmployeeDirectory.Core.DTOs
 @using EmployeeDirectory.Core.Services
 @using EmployeeDirectory.Desktop.Components.Navigation
-@using EmployeeDirectory.UI;
+@using EmployeeDirectory.UI
 @using Telerik.Blazor
 @using Telerik.Blazor.Components
 @using Telerik.SvgIcons
 
-
 @inject IDirectoryService DirectoryService
 @inject NavigationManager NavigationManager
-@inject IJSRuntime JSRuntime
 @inject LayoutState LayoutState
 
 <PageTitle>Department</PageTitle>
 
-@* Loading/error state *@
 @if (Department == null)
 {
     <p>No Data Available...</p>
 }
 else
 {
-    @* Scrollable list of department employees *@
     <div class="button-page-container">
         <div class="scrollable-wrapper">
             <TelerikListView Data="@Department.Employees" EnableLoaderContainer="true" Class="button-list-container" Pageable="false">
                 <Template Context="emp">
-                    <NavLink href="@($"/corporate/{departmentID}/{emp.Id}")" class="text-decoration-none k-text-uppercase">
-                        <div class="menu-item py-3 px-4 my-2 rounded-3 k-text-white tracking-wider k-font-size-lg" style="font-size: medium; font-weight: bold; letter-spacing: 2px;">
+                    <NavLink href="@($"/corporate/{departmentID}/{emp.Id}")" class="nav-link-clean">
+                        <div class="menu-item employee-list-item">
                             @* Employee name with manager star indicator *@
-                            <div class="k-align-items-center">
+                            <div class="employee-name-row">
                                 @emp.FirstName @emp.LastName
                                 @if (emp.IsManager == true)
                                 {
-                                    <span class="k-color-warning ps-1">
+                                    <span class="manager-indicator">
                                         <TelerikSvgIcon Icon="@SvgIcon.Star" Size="@ThemeConstants.SvgIcon.Size.Large" />
                                     </span>
                                 }
                             </div>
                             @* Employee job title *@
-                            <div class="k-color-dark k-font-bold k-font-size-sm">@emp.JobTitle</div>
+                            <div class="employee-title">@emp.JobTitle</div>
                         </div>
                     </NavLink>
                 </Template>
@@ -50,27 +47,53 @@ else
 }
 
 <style>
+    .nav-link-clean {
+        text-decoration: none;
+        text-transform: uppercase;
+    }
+
+    .employee-list-item {
+        padding: 0.75rem 1rem;
+        margin: 0.5rem 0;
+        border-radius: 0.75rem;
+        color: white;
+        font-size: medium;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+
+    .employee-name-row {
+        align-items: center;
+    }
+
+    .manager-indicator {
+        color: var(--kendo-color-warning);
+        padding-left: 0.25rem;
+    }
+
+    .employee-title {
+        color: var(--kendo-color-dark);
+        font-weight: bold;
+        font-size: small;
+    }
+
+    .button-list-container {
+        padding: 0 10px;
+    }
 </style>
 
 @code {
-    // Department ID from URL route parameter
     [Parameter]
     public int departmentID { get; set; }
 
-    // Department entity with associated employees
     private DepartmentDto? Department;
-
-    // Header card model for department display
     private HeaderCardModels.HeadInfoCardModel? DepartmentInfo;
-
     private List<FooterNav.FooterItem> FooterNav => FooterNavigation.CorporateSection;
 
-    // Load department data and configure header when parameters change
     protected override async Task OnParametersSetAsync()
     {
         Department = await DirectoryService.GetDepartmentWithEmployeesAsync(departmentID);
 
-        // Sort employees alphabetically by first name, then last name
         if (Department?.Employees != null)
         {
             Department.Employees = Department.Employees
@@ -79,7 +102,6 @@ else
                 .ToList();
         }
 
-        // Create department header using factory method
         if (Department != null)
         {
             DepartmentInfo = HeaderCardModels.ForDepartment(
@@ -91,7 +113,6 @@ else
         }
     }
 
-    // Configure layout state with department header and footer
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender && DepartmentInfo != null)
