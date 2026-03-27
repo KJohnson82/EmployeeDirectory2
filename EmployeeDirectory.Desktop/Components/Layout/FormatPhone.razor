@@ -1,0 +1,42 @@
+﻿@using Telerik.Blazor.Components
+
+@* <TelerikMaskedTextBox Value="@PhoneNumber"
+                      Mask="(000) 000-0000"
+                      Placeholder="(000) 000-0000"
+                      Class="@PhoneNumClass"
+                      ReadOnly="true"
+                      Enabled="true" /> *@
+
+@GetFormattedNumber()
+
+
+@code {
+    [Parameter]
+    public string? PhoneNumber { get; set; }
+
+    [Parameter]
+    public string? PhoneNumClass { get; set; }
+
+    private string GetFormattedNumber()
+    {
+        if (string.IsNullOrWhiteSpace(PhoneNumber))
+            return string.Empty;
+
+        var digits = new string(PhoneNumber.Where(char.IsDigit).ToArray());
+
+        if (digits.Length == 10)
+        {
+            return Convert.ToInt64(digits).ToString("(###) ###-####");
+        }
+
+        return PhoneNumber;
+    }
+}
+
+<style>
+    /* .inline-phone {
+        display: inline-flex;
+        padding: 0;
+        
+    } */
+</style>

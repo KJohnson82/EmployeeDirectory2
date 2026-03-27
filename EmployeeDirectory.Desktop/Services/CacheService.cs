@@ -1,12 +1,8 @@
-﻿using EmployeeDirectory.Core.Extensions;
-using EmployeeDirectory.Core.Models;
+﻿using EmployeeDirectory.Core.Models;
 using EmployeeDirectory.Desktop.Data;
 using EmployeeDirectory.Desktop.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Location = EmployeeDirectory.Core.Models.Location;
 
 namespace EmployeeDirectory.Desktop.Services

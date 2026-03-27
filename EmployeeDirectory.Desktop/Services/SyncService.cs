@@ -1,11 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using EmployeeDirectory.Core.Extensions;
 using EmployeeDirectory.Desktop.Interfaces;
-using EmployeeDirectory.Core.DTOs;
-using EmployeeDirectory.Core.Models;
-using EmployeeDirectory.Core.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace EmployeeDirectory.Desktop.Services
 {

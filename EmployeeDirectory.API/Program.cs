@@ -21,7 +21,7 @@ builder.AddNpgsqlDbContext<AppDbContext>("employeedirectory-db", configureDbCont
 #endif
 });
 
-builder.AddRedisDistributedCache("redis");
+builder.AddRedisDistributedCache("ed-redis");
 
 // ===== SERVICE REGISTRATION =====
 builder.Services.AddScoped<IDirectoryService, DirectoryService>();

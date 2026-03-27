@@ -1,10 +1,6 @@
 ﻿using EmployeeDirectory.Core.DTOs;
 using EmployeeDirectory.Desktop.Interfaces;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
 
 namespace EmployeeDirectory.Desktop.Services
 {

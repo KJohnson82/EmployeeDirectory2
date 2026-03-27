@@ -4,6 +4,7 @@ using EmployeeDirectory.Core.Data.Context;
 using EmployeeDirectory.Core.Services;
 using EmployeeDirectory.ServiceDefaults;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,7 +24,7 @@ builder.AddNpgsqlDbContext<AppDbContext>("employeedirectory-db", configureDbCont
 
 builder.Services.AddDbContextFactory<AppDbContext>(lifetime: ServiceLifetime.Scoped);
 
-builder.AddRedisDistributedCache("redis");
+builder.AddRedisDistributedCache("ed-redis");
 
 builder.Services.AddScoped<DirectoryService>();
 
@@ -62,14 +63,29 @@ using (var scope = app.Services.CreateScope())
     {
         logger.LogInformation("Checking database connection...");
 
+        if (await context.Database.CanConnectAsync())
+        {
+            var empCount = await context.Employees.CountAsync();
+            var deptCount = await context.Departments.CountAsync();
+            var locCount = await context.Locations.CountAsync();
+            logger.LogInformation(
+                "Database connected. Employees: {Emp}, Departments: {Dept}, Locations: {Loc}",
+                empCount, deptCount, locCount);
+        }
+        else
+        {
+            logger.LogError("Cannot connect to database.");
+            throw new Exception("Database connection failed.");
+        }
+
         // TODO: Switch to MigrateAsync once EF Core migrations are set up
         // await context.Database.MigrateAsync();
 
         // Using EnsureCreatedAsync for initial development (creates schema without migrations)
         // Remove this line when switching to MigrateAsync above
-        await context.Database.EnsureCreatedAsync();
+        //await context.Database.EnsureCreatedAsync();
 
-        logger.LogInformation("Database schema ready.");
+        //logger.LogInformation("Database schema ready.");
     }
     catch (Exception ex)
     {

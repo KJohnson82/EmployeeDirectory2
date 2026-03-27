@@ -86,7 +86,7 @@ public static class MauiProgram
             var context = scope.ServiceProvider.GetRequiredService<LocalCacheContext>();
             context.Database.EnsureCreated();
         }
-        
+
         return app;
     }
 }

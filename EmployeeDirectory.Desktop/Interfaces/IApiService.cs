@@ -1,7 +1,4 @@
 ﻿using EmployeeDirectory.Core.DTOs;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace EmployeeDirectory.Desktop.Interfaces
 {

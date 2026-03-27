@@ -17,7 +17,7 @@ html, body {
 }
 
 *, ::after, ::before {
-    box-sizing: unset;
+    box-sizing: border-box;
 }
 
 a, .btn-link {

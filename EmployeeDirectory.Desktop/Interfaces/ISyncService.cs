@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EmployeeDirectory.Desktop.Interfaces
+﻿namespace EmployeeDirectory.Desktop.Interfaces
 {
     /// Service for syncing data from API to local cache
 

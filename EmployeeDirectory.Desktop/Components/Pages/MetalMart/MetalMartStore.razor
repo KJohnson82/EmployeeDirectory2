@@ -51,37 +51,71 @@ else
                     </div>
                 }
 
-                @if (!string.IsNullOrWhiteSpace(Store.PhoneNumber) || !string.IsNullOrWhiteSpace(Store.FaxNumber))
+                @if (!string.IsNullOrWhiteSpace(Store.PhoneNumber) || !string.IsNullOrWhiteSpace(Store.AltNumber) || !string.IsNullOrWhiteSpace(Store.FaxNumber))
                 {
-                    <div class="section">
-                        @if (!string.IsNullOrWhiteSpace(Store.FaxNumber))
-                        {
+                    @* Show Phone and Alt in two columns if both exist *@
+                    @if (!string.IsNullOrWhiteSpace(Store.PhoneNumber) && !string.IsNullOrWhiteSpace(Store.AltNumber))
+                    {
+                        <div class="section">
                             <div class="two-column">
-                                @if (!string.IsNullOrWhiteSpace(Store.PhoneNumber))
-                                {
-                                    <div class="column">
-                                        <div class="right-divider">PHONE</div>
-                                        <div class="section-content">@Store.PhoneNumber</div>
+                                <div class="column">
+                                    <div class="right-divider">PHONE#</div>
+                                    <div class="section-content">
+                                        <FormatPhone PhoneNumber="@Store.PhoneNumber" />
                                     </div>
-                                }
+                                </div>
                                 <div class="divider-vertical"></div>
                                 <div class="column">
-                                    <div class="left-divider">FAX</div>
-                                    <div class="section-content">@Store.FaxNumber</div>
+                                    <div class="left-divider">ALT#</div>
+                                    <div class="section-content">
+                                        <FormatPhone PhoneNumber="@Store.AltNumber" />
+                                    </div>
                                 </div>
                             </div>
-                        }
-                        else
-                        {
-                            @if (!string.IsNullOrWhiteSpace(Store.PhoneNumber))
-                            {
-                                <div class="section section-right">
-                                    <div class="right-divider">PHONE</div>
-                                    <div class="section-content text-end">@Store.PhoneNumber</div>
+                        </div>
+                    }
+                    @* Show Phone and Fax in two columns if both exist and no Alt *@
+                    else if (!string.IsNullOrWhiteSpace(Store.PhoneNumber) && !string.IsNullOrWhiteSpace(Store.FaxNumber))
+                    {
+                        <div class="section">
+                            <div class="two-column">
+                                <div class="column">
+                                    <div class="right-divider">PHONE#</div>
+                                    <div class="section-content">
+                                        <FormatPhone PhoneNumber="@Store.PhoneNumber" />
+                                    </div>
                                 </div>
-                            }
-                        }
-                    </div>
+                                <div class="divider-vertical"></div>
+                                <div class="column">
+                                    <div class="left-divider">FAX#</div>
+                                    <div class="section-content">
+                                        <FormatPhone PhoneNumber="@Store.FaxNumber" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @* Show just Phone if it exists alone *@
+                    else if (!string.IsNullOrWhiteSpace(Store.PhoneNumber))
+                    {
+                        <div class="section section-right">
+                            <div class="right-divider">PHONE#</div>
+                            <div class="section-content-single-phone-right">
+                                <FormatPhone PhoneNumber="@Store.PhoneNumber" />
+                            </div>
+                        </div>
+                    }
+
+                    @* Show Fax separately if it exists and Alt also exists (meaning it wasn't shown in Phone|Fax above) *@
+                    @if (!string.IsNullOrWhiteSpace(Store.FaxNumber) && !string.IsNullOrWhiteSpace(Store.AltNumber))
+                    {
+                        <div class="section section-right">
+                            <div class="right-divider">FAX#</div>
+                            <div class="section-content-single-phone-right">
+                                <FormatPhone PhoneNumber="@Store.FaxNumber" />
+                            </div>
+                        </div>
+                    }
                 }
 
                 @if (!string.IsNullOrWhiteSpace(Store.Email))
@@ -140,10 +174,34 @@ else
     }
 
     .section-content {
-        font-size: clamp(0.9rem, 2vw + 0.75rem, 1.25rem);
+        font-size: clamp(0.7rem, 2vw + 0.75rem, 1.10rem);
         line-height: 1;
         letter-spacing: 1.25px;
     }
+
+    .section-content-single-phone-left {
+        font-size: clamp(0.7rem, 2vw + 0.75rem, 1.10rem);
+        line-height: 1;
+        letter-spacing: 1.25px;
+        /* padding-left: 1rem; */
+        text-align: left;
+    }
+
+    .section-content-single-phone-right {
+        font-size: clamp(0.7rem, 2vw + 0.75rem, 1.10rem);
+        line-height: 1;
+        letter-spacing: 1.25px;
+        /* padding-right: 1rem; */
+        text-align: right;
+    }
+
+    /* .section-content-single-phone {
+        font-size: clamp(0.7rem, 2vw + 0.75rem, 1.10rem);
+        line-height: 1;
+        letter-spacing: 1.25px;
+        padding-left: 1rem;
+        text-align: right;
+    } */
 
     .section-content-email {
         font-size: clamp(0.875rem, 2vw + 0.65rem, 1rem);

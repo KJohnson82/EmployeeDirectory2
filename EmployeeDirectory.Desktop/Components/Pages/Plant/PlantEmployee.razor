@@ -36,7 +36,8 @@ else
                         <div class="contact-section section-left">
                             <div class="left-divider">PHONE</div>
                             <div class="contact-value">
-                                @Employee.PhoneNumber
+                                <FormatPhone PhoneNumber="@Employee.PhoneNumber" />
+                                @* @Employee.PhoneNumber *@
                                 @if (!string.IsNullOrWhiteSpace(Employee.Extension))
                                 {
                                     <span> | EXT: @Employee.Extension</span>
@@ -49,7 +50,7 @@ else
                     {
                         <div class="contact-section section-right">
                             <div class="right-divider">EMAIL</div>
-                            <div class="contact-value text-end">@Employee.Email</div>
+                            <div class="contact-value email-format text-end">@Employee.Email</div>
                         </div>
                     }
 
@@ -57,7 +58,10 @@ else
                     {
                         <div class="contact-section section-left">
                             <div class="left-divider">CELL</div>
-                            <div class="contact-value">@Employee.CellNumber</div>
+                            <div class="contact-value">
+                                @* @Employee.CellNumber *@
+                                <FormatPhone PhoneNumber="@Employee.CellNumber" />
+                                </div>
                         </div>
                     }
 
@@ -83,6 +87,10 @@ else
         padding: 10px 0;
         border-top: 2px solid var(--kendo-color-dark-subtle);
         border-bottom: 8px solid var(--kendo-color-dark-subtle);
+    }
+
+    .email-format {
+        text-transform: lowercase;
     }
 
     .scrollable-wrapper {

@@ -3,6 +3,7 @@
 @using EmployeeDirectory.Core.DTOs
 @using EmployeeDirectory.Core.Services
 @using EmployeeDirectory.Desktop.Components.Navigation
+@using EmployeeDirectory.Desktop.Components.Layout
 
 @inject IDirectoryService DirectoryService
 @inject NavigationManager NavigationManager
@@ -36,7 +37,8 @@ else
                         <div class="contact-section section-left">
                             <div class="left-divider">PHONE</div>
                             <div class="contact-value">
-                                @Employee.PhoneNumber
+                                <FormatPhone PhoneNumber="@Employee.PhoneNumber" />
+                                @* @Employee.PhoneNumber *@
                                 @if (!string.IsNullOrWhiteSpace(Employee.Extension))
                                 {
                                     <span> | EXT: @Employee.Extension</span>
@@ -49,15 +51,17 @@ else
                     {
                         <div class="contact-section section-right">
                             <div class="right-divider">EMAIL</div>
-                            <div class="contact-value text-end">@Employee.Email</div>
+                            <div class="contact-value email-format text-end">@Employee.Email</div>
                         </div>
                     }
 
                     @if (!string.IsNullOrWhiteSpace(Employee.CellNumber))
                     {
                         <div class="contact-section section-left">
-                            <div class="left-divider">CELL</div>
-                            <div class="contact-value">@Employee.CellNumber</div>
+                            <div class="left-divider">ALT#</div>
+                            <div class="contact-value">
+                                <FormatPhone PhoneNumber="@Employee.CellNumber" />
+                                </div>
                         </div>
                     }
 
@@ -83,6 +87,11 @@ else
         padding: 10px 0;
     }
 
+    .email-format {
+        text-transform: lowercase;
+    }
+
+
     .scrollable-wrapper {
         flex: 1;
         overflow-y: auto;
@@ -102,7 +111,7 @@ else
 
     .employee-name-section {
         padding: 20px;
-        text-align: center;
+        text-align: end;
         border-bottom: 2px solid var(--kendo-color-primary);
         margin-bottom: 0.5rem;
     }
