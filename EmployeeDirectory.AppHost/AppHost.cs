@@ -27,7 +27,7 @@ var postgresPassword = builder.AddParameter("postgres-password", secret: true);
 
 var postgres = builder.AddPostgres("ed-postgres", password: postgresPassword)
     .WithDataVolume("employeedirectory-pgdata")
-    .WithLifetime(isPublishMode ? ContainerLifetime.Persistent : ContainerLifetime.Session)
+    .WithLifetime(ContainerLifetime.Persistent)
     .PublishAsDockerComposeService((resource, service) =>
     {
         service.Name = "ed-postgres";
