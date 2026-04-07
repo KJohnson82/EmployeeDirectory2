@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="deploy.ps1" />
+    <File Path="deployold.ps1" />
+  </Folder>
   <Project Path="EmployeeDirectory.Admin/EmployeeDirectory.Admin.csproj" Id="77da9916-6987-4963-b7b1-d122f846a935" />
   <Project Path="EmployeeDirectory.API/EmployeeDirectory.API.csproj" />
   <Project Path="EmployeeDirectory.AppHost/EmployeeDirectory.AppHost.csproj" />

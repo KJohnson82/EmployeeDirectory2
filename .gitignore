@@ -361,3 +361,11 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/EmployeeDirectory.UI_Backup_2026.03.30_04.41.20
+/EmployeeDirectory.Admin_Backup_2026.03.30_04.40.42
+/EmployeeDirectory.Admin_Backup_2026.03.30_04.41.20
+/EmployeeDirectory.UI_Backup_2026.03.30_04.40.42
+/EmployeeDirectory.AppHost/aspire-output/.env
+/EmployeeDirectory.AppHost/aspire-output/.env.Production
+/EmployeeDirectory.AppHost/aspire-output/.env.staging
+/EmployeeDirectory.AppHost/aspire-output/docker-compose.yaml

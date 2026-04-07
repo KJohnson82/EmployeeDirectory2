@@ -1,25 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
-
-
-	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.2.0" />
-		<PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.2.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
-		<PackageReference Include="Telerik.UI.for.Blazor" Version="13.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\EmployeeDirectory.Core\EmployeeDirectory.Core.csproj" />
-	  <ProjectReference Include="..\EmployeeDirectory.ServiceDefaults\EmployeeDirectory.ServiceDefaults.csproj" />
-	  <ProjectReference Include="..\EmployeeDirectory.UI\EmployeeDirectory.UI.csproj" />
-	</ItemGroup>
-
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Docker" Version="13.2.1" />
+    <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.2.1" />
+    <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.2.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery.Yarp" Version="10.4.0" />
+    <PackageReference Include="Telerik.UI.for.Blazor">
+      <Version>13.1.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EmployeeDirectory.Core\EmployeeDirectory.Core.csproj" />
+    <ProjectReference Include="..\EmployeeDirectory.ServiceDefaults\EmployeeDirectory.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\EmployeeDirectory.UI\EmployeeDirectory.UI.csproj" />
+  </ItemGroup>
 </Project>
