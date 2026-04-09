@@ -369,3 +369,5 @@ FodyWeavers.xsd
 /EmployeeDirectory.AppHost/aspire-output/.env.Production
 /EmployeeDirectory.AppHost/aspire-output/.env.staging
 /EmployeeDirectory.AppHost/aspire-output/docker-compose.yaml
+/UpdateMigrations.txt
+/deployold.ps1
