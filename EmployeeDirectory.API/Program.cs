@@ -29,6 +29,7 @@ builder.Services.AddScoped<IDirectoryService, DirectoryService>();
 var app = builder.Build();
 
 app.MapGet("/health", () => Results.Ok("Healthy!"));
+app.MapGet("/api/health", () => Results.Ok("Healthy!"));
 
 
 app.MapDefaultEndpoints();
@@ -37,6 +38,15 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+}
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler(error => error.Run(async context =>
+    {
+        context.Response.StatusCode = 500;
+        await context.Response.WriteAsync("Internal server error");
+    }));
 }
 
 // ===== DATABASE INITIALIZATION =====
@@ -53,9 +63,11 @@ using (var scope = app.Services.CreateScope())
 
         // Using EnsureCreatedAsync for initial development (creates schema without migrations)
         // Remove this line when switching to MigrateAsync above
-        await context.Database.EnsureCreatedAsync();
+        //await context.Database.EnsureCreatedAsync();
 
-        logger.LogInformation("Database schema ready.");
+        //logger.LogInformation("Database schema ready.");
+        await context.Database.MigrateAsync();
+        logger.LogInformation("Database migrations applied.");
     }
     catch (Exception ex)
     {
@@ -102,6 +114,7 @@ app.MapGet("/api/system/dbinfo", async (AppDbContext context) =>
 })
 .WithName("DatabaseInfo")
 .WithTags("System");
+
 
 //app.UseHttpsRedirection();
 

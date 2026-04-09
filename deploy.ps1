@@ -7,14 +7,14 @@ aspire publish
 # with filled registry image names, cache deployment state
 aspire do prepare-employeedirectory-env --environment Production
 
-# Step 3 
-aspire deploy --environment Production
-
 # Step 3: Push the built images to the private registry
 # (uses the same cached deploy tag from step 2)
 aspire do push --environment Production
 
-# Step 4: Deploy to remote server
+# Step 4: Build and tag images with the deploy tag, generate .env.Production 
+aspire deploy --environment Production
+
+# Step 5: Deploy to remote server
 docker --context proxmox-lxc compose `
     -p employeedirectory `
     -f .\EmployeeDirectory.AppHost\aspire-output\docker-compose.yaml `

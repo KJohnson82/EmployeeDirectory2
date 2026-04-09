@@ -31,7 +31,13 @@ var postgres = builder.AddPostgres("ed-postgres", password: postgresPassword)
         service.Name = "ed-postgres";
         service.Restart = "unless-stopped";
     })
-    .WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050));
+    .WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050)
+    .PublishAsDockerComposeService((resource, service) =>
+    {
+        service.Name = "ed-pgadmin";
+        service.Restart = "unless-stopped";
+    })
+    );
 
 var employeeDirectoryDb = postgres.AddDatabase("employeedirectory-db");
 
@@ -60,10 +66,13 @@ var edapi = builder.AddProject<Projects.EmployeeDirectory_API>("ed-api")
 #pragma warning restore ASPIRECOMPUTE003, ASPIREPIPELINES003
 
 // ===== ADMIN =====
+var adminPasswordHash = builder.AddParameter("admin-password-hash", secret: true);
 #pragma warning disable ASPIRECOMPUTE003, ASPIREPIPELINES003
 var admin = builder.AddProject<Projects.EmployeeDirectory_Admin>("ed-admin")
+    .WaitFor(edapi)
     .WithReference(employeeDirectoryDb).WaitFor(employeeDirectoryDb)
     .WithReference(redis).WaitFor(redis)
+    .WithEnvironment("AppSettings__PasswordHash", adminPasswordHash)
     .WithContainerRegistry(registry)
     .WithRemoteImageTag("latest")
     .PublishAsDockerComposeService((resource, service) =>
@@ -81,9 +90,12 @@ builder.AddYarp("ed-gateway")
         // Specific API route first — YARP matches top-down
         yarp.AddRoute("/api/{**catch-all}", edapi)
             .WithMatchMethods("GET", "POST", "PUT", "DELETE", "PATCH")
-            .WithTransformPathRemovePrefix("/api");
+            .WithTransformUseOriginalHostHeader();
+            //.WithTransformPathRemovePrefix("/api");
         // Catch-all to admin for everything else
-        yarp.AddRoute("/{**catch-all}", admin);
+        yarp.AddRoute("/{**catch-all}", admin)
+            .WithTransformUseOriginalHostHeader();
+
     })
     .PublishAsDockerComposeService((resource, service) =>
     {

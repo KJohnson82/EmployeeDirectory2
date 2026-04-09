@@ -8,7 +8,6 @@
     <SupportedPlatform Include="browser" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.Docker" Version="13.2.1" />
     <PackageReference Include="bootstrap" Version="5.3.8" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.ServiceDiscovery.Yarp" Version="10.4.0" />
