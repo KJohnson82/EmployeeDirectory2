@@ -371,3 +371,4 @@ FodyWeavers.xsd
 /EmployeeDirectory.AppHost/aspire-output/docker-compose.yaml
 /UpdateMigrations.txt
 /deployold.ps1
+/EmployeeDirectory.Desktop/MMEDInnoScript.iss
