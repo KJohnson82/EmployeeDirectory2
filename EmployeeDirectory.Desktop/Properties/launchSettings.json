@@ -3,6 +3,9 @@
     "Windows Machine": {
       "commandName": "Project",
       "nativeDebugging": false
+    },
+    "Packaged (MSIX)": {
+      "commandName": "MsixPackage"
     }
   }
 }

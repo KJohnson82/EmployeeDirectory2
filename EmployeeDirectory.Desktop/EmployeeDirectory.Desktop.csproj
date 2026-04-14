@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 	<PropertyGroup>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
+		<TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
 		<OutputType>Exe</OutputType>
 		<RootNamespace>EmployeeDirectory.Desktop</RootNamespace>
 		<UseMaui>true</UseMaui>
@@ -8,22 +8,21 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<EnableDefaultCssItems>false</EnableDefaultCssItems>
 		<Nullable>enable</Nullable>
-		<!-- Display name -->
+
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+
 		<ApplicationTitle>McElroy Directory</ApplicationTitle>
-		<!-- App Identifier -->
 		<ApplicationId>com.mcelroymetal.employeedirectory.desktop</ApplicationId>
-		<!-- Versions -->
-		<ApplicationDisplayVersion>1.1</ApplicationDisplayVersion>
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
-		<!-- Unpackaged Windows app - no MSIX -->
+
 		<WindowsPackageType>None</WindowsPackageType>
+
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<PlatformTarget>x64</PlatformTarget>
 		<AssemblyName>MMDirectory</AssemblyName>
-		<GenerateDocumentationFile>False</GenerateDocumentationFile>
 	</PropertyGroup>
-
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.png" Color="#512BD4" />
@@ -36,37 +35,31 @@
 		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
-
 	<ItemGroup>
-		<Content Remove="appsettings.json" />
+		<!--<Content Remove="appsettings.json" />-->
 		<Content Remove="appsettings.Development.json" />
 		<Content Remove="appsettings.Production.json" />
-		<!--<None Include="appsettings.Development.json" />
-		<None Include="appsettings.Production.json" />-->
 	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Include="appsettings.json" />
-		<EmbeddedResource Include="appsettings.Production.json" />
-	</ItemGroup>
-
-	<!--<ItemGroup>
-		<ScopedCssFiles Remove="bin\**" />
-		<ScopedCssFiles Remove="obj\**" />
-	</ItemGroup>-->
-
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.51" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="10.0.51" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.5" />
-		<PackageReference Include="Telerik.UI.for.Blazor">
-			<Version>13.1.0</Version>
+		<PackageReference Include="Telerik.UI.for.Blazor" Version="13.1.0">
+			<TreatAsUsed>true</TreatAsUsed>
 		</PackageReference>
 	</ItemGroup>
-
 	<ItemGroup>
 		<ProjectReference Include="..\EmployeeDirectory.Core\EmployeeDirectory.Core.csproj" />
 		<ProjectReference Include="..\EmployeeDirectory.UI\EmployeeDirectory.UI.csproj" />
 	</ItemGroup>
-
+	<ItemGroup>
+		<EmbeddedResource Include="appsettings.json" />
+		<EmbeddedResource Include="appsettings.Production.json" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Remove="C:\Users\kevin00j1.MCELROY\.nuget\packages\microsoft.windowsappsdk.runtime\1.8.251106002\buildTransitive\..\include\WindowsAppSDK-VersionInfo.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Remove="C:\Users\kevin00j1.MCELROY\.nuget\packages\microsoft.windowsappsdk.runtime\1.8.251106002\buildTransitive\..\include\WindowsAppSDK-VersionInfo.cs" />
+	</ItemGroup>
 </Project>

@@ -10,6 +10,10 @@ public partial class App : Application
     // Parameterless constructor for MAUI framework
     public App(ISyncService syncService)
     {
+#if WINDOWS
+        var userDataFolder = Path.Combine(FileSystem.AppDataDirectory, "WebView2");
+        Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER", userDataFolder);
+#endif
         InitializeComponent();
         _syncService = syncService;
     }
