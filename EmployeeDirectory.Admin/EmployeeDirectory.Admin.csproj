@@ -11,8 +11,7 @@
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
     <PackageReference Include="Telerik.UI.for.Blazor">
-      <Version>13.1.0</Version>
-      <TreatAsUsed>true</TreatAsUsed>
+      <Version>13.3.0</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
