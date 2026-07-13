@@ -41,6 +41,5 @@ public partial class Department
 
     public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
 
-    [Required]
     public virtual Location? DeptLocation { get; set; }
 }

@@ -22,24 +22,27 @@ var registry = builder.AddContainerRegistry("ed-registry", "10.169.176.246:5000"
 #pragma warning restore ASPIRECOMPUTE003, ASPIREPIPELINES003
 
 // ===== DATABASE =====
-var postgresPassword = builder.AddParameter("postgres-password", secret: true);
-var postgres = builder.AddPostgres("ed-postgres", password: postgresPassword)
-    .WithDataVolume("employeedirectory-pgdata")
-    .WithLifetime(ContainerLifetime.Persistent)
-    .PublishAsDockerComposeService((resource, service) =>
-    {
-        service.Name = "ed-postgres";
-        service.Restart = "unless-stopped";
-    })
-    .WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050)
-    .PublishAsDockerComposeService((resource, service) =>
-    {
-        service.Name = "ed-pgadmin";
-        service.Restart = "unless-stopped";
-    })
-    );
+//var postgresPassword = builder.AddParameter("postgres-password", secret: true);
+//var postgres = builder.AddPostgres("ed-postgres", password: postgresPassword)
+//    .WithDataVolume("employeedirectory-pgdata")
+//    .WithLifetime(ContainerLifetime.Persistent)
+//    .PublishAsDockerComposeService((resource, service) =>
+//    {
+//        service.Name = "ed-postgres";
+//        service.Restart = "unless-stopped";
+//    })
+//    .WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050)
+//    .PublishAsDockerComposeService((resource, service) =>
+//    {
+//        service.Name = "ed-pgadmin";
+//        service.Restart = "unless-stopped";
+//    })
+//    );
 
-var employeeDirectoryDb = postgres.AddDatabase("employeedirectory-db");
+//var employeeDirectoryDb = postgres.AddDatabase("employeedirectory-db");
+
+// ===== DATABASE (external standalone container) =====
+var employeeDirectoryDb = builder.AddConnectionString("employeedirectory-db");
 
 // ===== CACHE =====
 var redis = builder.AddRedis("ed-redis")
@@ -54,7 +57,8 @@ var redis = builder.AddRedis("ed-redis")
 // ===== API =====
 #pragma warning disable ASPIRECOMPUTE003, ASPIREPIPELINES003
 var edapi = builder.AddProject<Projects.EmployeeDirectory_API>("ed-api")
-    .WithReference(employeeDirectoryDb).WaitFor(employeeDirectoryDb)
+    .WithReference(employeeDirectoryDb)
+    //.WaitFor(employeeDirectoryDb)
     .WithReference(redis).WaitFor(redis)
     .WithContainerRegistry(registry)
     .WithRemoteImageTag("latest")
@@ -70,7 +74,8 @@ var adminPasswordHash = builder.AddParameter("admin-password-hash", secret: true
 #pragma warning disable ASPIRECOMPUTE003, ASPIREPIPELINES003
 var admin = builder.AddProject<Projects.EmployeeDirectory_Admin>("ed-admin")
     .WaitFor(edapi)
-    .WithReference(employeeDirectoryDb).WaitFor(employeeDirectoryDb)
+    .WithReference(employeeDirectoryDb)
+    //.WaitFor(employeeDirectoryDb)
     .WithReference(redis).WaitFor(redis)
     .WithEnvironment("AppSettings__PasswordHash", adminPasswordHash)
     .WithContainerRegistry(registry)
@@ -91,7 +96,7 @@ builder.AddYarp("ed-gateway")
         yarp.AddRoute("/api/{**catch-all}", edapi)
             .WithMatchMethods("GET", "POST", "PUT", "DELETE", "PATCH")
             .WithTransformUseOriginalHostHeader();
-            //.WithTransformPathRemovePrefix("/api");
+        //.WithTransformPathRemovePrefix("/api");
         // Catch-all to admin for everything else
         yarp.AddRoute("/{**catch-all}", admin)
             .WithTransformUseOriginalHostHeader();
@@ -113,115 +118,10 @@ builder.AddYarp("ed-gateway")
         };
     });
 
+//Dekstop Start
+
+//builder.AddProject("employeedirectory-desktop",
+//        @"..\EmployeeDirectory.Desktop\EmployeeDirectory.Desktop.csproj")
+//        .WaitForStart(edapi);
+
 builder.Build().Run();
-
-
-
-
-//using Aspire.Hosting.Yarp;
-//using Aspire.Hosting.Yarp.Transforms;
-//using Aspire.Hosting.Docker.Resources.ComposeNodes;
-
-
-//var builder = DistributedApplication.CreateBuilder(args);
-
-//// ===== CONFIGURATION FLAGS =====
-//var isPublishMode = builder.ExecutionContext.IsPublishMode;
-
-//// ===== DOCKER COMPOSE ENVIRONMENT (for publish/deploy) =====
-
-//builder.AddDockerComposeEnvironment("employeedirectory-env")
-//    .WithProperties(env =>
-//    {
-//        env.DashboardEnabled = true;
-//    })
-//    .WithDashboard(dashboard =>
-//    {
-//        dashboard.WithHostPort(7070)
-//        .PublishAsDockerComposeService((resource, service) =>
-//        {
-//            service.Name = "ed-env";
-//        })
-//            .WithForwardedHeaders(enabled: true);
-//    });
-
-
-//// ===== DATABASE =====
-//var postgresPassword = builder.AddParameter("postgres-password", secret: true);
-//var postgres = builder.AddPostgres("ed-postgres", password: postgresPassword)
-//    .WithDataVolume("employeedirectory-pgdata")
-//    .WithLifetime(ContainerLifetime.Persistent)
-//    .PublishAsDockerComposeService((resource, service) =>
-//    {
-//        service.Name = "ed-postgres";
-
-//    })
-//    .WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050));
-
-//var employeeDirectoryDb = postgres.AddDatabase("employeedirectory-db");
-
-//// ===== CACHE =====
-//var redis = builder.AddRedis("ed-redis")
-//    .WithDataVolume("employeedirectory-redis-data")
-//    .WithLifetime(isPublishMode ? ContainerLifetime.Persistent : ContainerLifetime.Session)
-//    .PublishAsDockerComposeService((resource, service) =>
-//    {
-//        service.Name = "ed-redis";
-//    });
-
-//// ===== API =====
-//var edapi = builder.AddProject<Projects.EmployeeDirectory_API>("ed-api")
-//    .WithReference(employeeDirectoryDb)
-//    .WaitFor(employeeDirectoryDb)
-//    .WithReference(redis)
-//    .WaitFor(redis)
-//    .WithExternalHttpEndpoints()
-//    .PublishAsDockerComposeService((resource, service) =>
-//    {
-//        service.Name = "ed-api";
-//    });
-
-//// ===== ADMIN =====
-//var admin = builder.AddProject<Projects.EmployeeDirectory_Admin>("ed-admin")
-//    .WithReference(employeeDirectoryDb)
-//    .WaitFor(employeeDirectoryDb)
-//    .WithReference(redis)
-//    .WaitFor(redis)
-//    .WithExternalHttpEndpoints()
-//    .PublishAsDockerComposeService((resource, service) =>
-//    {
-//        service.Name = "ed-admin";
-//    });
-
-//// ==== YARP Setup ===
-//var gateway = builder.AddYarp("ed-gateway")
-//    .WithHostPort(80)
-//    //.WithHttpsEndpoint()
-//    .WithConfiguration(yarp =>
-//    {
-//        yarp.AddRoute(edapi);
-//        yarp.AddRoute(admin);
-
-//        yarp.AddRoute("/api/{**catch-all}", edapi)
-//            .WithMatchMethods("GET", "POST", "PUT", "DELETE", "PATCH")
-//            .WithTransformPathRemovePrefix("/api");
-
-//        //yarp.AddRoute("/health", edapi);
-
-//        //yarp.AddRoute("/admin/{**catch-all}", admin)
-//        //.WithTransformPathRemovePrefix("/admin");
-
-//        yarp.AddRoute("/{**catch-all}", admin)
-//        .WithTransformPathRemovePrefix("/admin");
-
-//    });
-
-//// ===== DESKTOP (dev only) =====
-////if (!isPublishMode)
-////{
-////    builder.AddProject("employeedirectory-desktop",
-////        @"..\EmployeeDirectory.Desktop\EmployeeDirectory.Desktop.csproj")
-////        .WaitForStart(edapi);
-////}
-
-//builder.Build().Run();

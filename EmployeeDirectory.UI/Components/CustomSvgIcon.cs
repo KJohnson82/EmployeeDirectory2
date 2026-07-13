@@ -1,15 +1,16 @@
-﻿using Telerik.SvgIcons;
+﻿using System;
+using Telerik.SvgIcons;
 
 //namespace MMDirectory.Layout
 //{
-public class CustomSvgIcon : ISvgIcon
+public class CustomSvgIcon : SvgIconBase
 {
-    public string Name { get; set; }
-    public string Content { get; set; }
-    public string ViewBox { get; set; } = "0 -960 960 960";
+    //public string Name { get; set; }
+    //public string Content { get; set; }
+    //public string ViewBox { get; set; } = "0 -960 960 960";
 
 
-    public CustomSvgIcon(string name, string content, string viewbox)
+    public CustomSvgIcon(string name, string content, string viewbox = "0 -960 960 960")
     {
         Name = name;
         Content = content;

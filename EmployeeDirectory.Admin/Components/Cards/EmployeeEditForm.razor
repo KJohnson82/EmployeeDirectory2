@@ -110,7 +110,7 @@
     private List<Department> FilteredDepartments =>
         Employee.Location == null || Employee.Location == 0
             ? Departments
-            : Departments.Where(d => d.Location == Employee.Location).ToList();
+            : Departments.Where(d => d.Location == Employee.Location).OrderBy(d => d.DeptName).ToList();
 
     private async Task OnValidSubmit()
     {

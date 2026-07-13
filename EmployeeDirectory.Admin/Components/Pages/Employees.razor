@@ -389,7 +389,7 @@
             await using var context = await DbContextFactory.CreateDbContextAsync();
 
             locations = await context.Locations.OrderBy(l => l.LocNum).ThenBy(l  => l.LocName).ToListAsync();
-            departments = await context.Departments.ToListAsync();
+            departments = await context.Departments.OrderBy(d => d.DeptName).ToListAsync();
 
             employees = await context.Employees!
                 .Include(e => e.EmpLocation)
