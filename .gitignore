@@ -372,3 +372,4 @@ FodyWeavers.xsd
 /UpdateMigrations.txt
 /deployold.ps1
 /EmployeeDirectory.Desktop/MMEDInnoScript.iss
+/EmployeeDirectory.UI/wwwroot/fonts/OpenSans-VariableFont_wdthwght.ttf
