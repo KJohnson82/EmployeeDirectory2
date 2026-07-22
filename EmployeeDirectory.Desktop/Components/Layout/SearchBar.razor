@@ -55,7 +55,7 @@
         if (!string.IsNullOrWhiteSpace(newValue) && newValue.Length >= 2)
         {
             // Debounce to prevent excessive API calls while typing
-            await Task.Delay(100);
+            await Task.Delay(300);
 
             // Only search if query hasn't changed (user stopped typing)
             if (SearchQuery == newValue)
