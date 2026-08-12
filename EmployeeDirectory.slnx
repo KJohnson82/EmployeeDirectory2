@@ -11,4 +11,5 @@
   <Project Path="EmployeeDirectory.Desktop/EmployeeDirectory.Desktop.csproj" />
   <Project Path="EmployeeDirectory.ServiceDefaults/EmployeeDirectory.ServiceDefaults.csproj" />
   <Project Path="EmployeeDirectory.UI/EmployeeDirectory.UI.csproj" />
+  <Project Path="EmployeeDirectory.WPF/EmployeeDirectory.WPF.csproj" Id="060c2e7c-3258-41a7-9fa6-8232266f39d1" />
 </Solution>

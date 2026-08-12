@@ -72,7 +72,7 @@ public class SearchService : ISearchService
 
     #region Private Search Methods
 
-    
+
     /// Searches for employees matching the provided search term.
     /// Searches across multiple employee fields: name, job title, contact information.
     /// Uses in-memory filtering after loading active employees to avoid complex SQL generation.
@@ -125,7 +125,7 @@ public class SearchService : ISearchService
         }
     }
 
-    
+
     /// Searches for departments matching the provided search term.
     /// Searches across department name, manager, and contact information.
     /// Uses the same in-memory filtering pattern as employee search for consistency.
@@ -217,12 +217,12 @@ public class SearchService : ISearchService
 /// Initialized with empty collections to prevent null reference exceptions.
 public class SearchResults
 {
-    
+
     /// Collection of Employee entities that matched the search criteria.
     /// Initialized as empty list to prevent null reference issues.
     public List<Employee> Employees { get; set; } = new();
 
-    
+
     /// Collection of Department entities that matched the search criteria.
     /// Initialized as empty list to prevent null reference issues.
     public List<Department> Departments { get; set; } = new();

@@ -1,5 +1,4 @@
-﻿using EmployeeDirectory.Core.Enums;
-using EmployeeDirectory.Core.Models;
+﻿using EmployeeDirectory.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Location = EmployeeDirectory.Core.Models.Location;
 

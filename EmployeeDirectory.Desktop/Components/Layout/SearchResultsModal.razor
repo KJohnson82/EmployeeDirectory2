@@ -5,187 +5,192 @@
 @inject EmployeeDirectory.Core.Services.ISearchService SearchService
 @inject NavigationManager Navigation
 
-@* Modal dialog for displaying search results in a tabbed interface *@
-<TelerikWindow Class="search-modal"
+@* FILE: SearchResultsModal.razor
+   PURPOSE: Modal window to display search results (Employees, Departments, Locations).
+   NOTE: UI-related classes are documented above the corresponding elements so you can
+         change colors/spacing in CSS without hunting through markup. *@
+
+@* Root modal window component.
+   - Change overall modal appearance via the `.search-modal` class and `.k-window` styles.
+   - Telerik window props control size/behavior (Width/Height/Draggable/Modal). *@
+<TelerikWindow Class="search-modal k-colors-secondary"
                Width="350px"
-               Height="500px"
-               Draggable="true"
+               Height="600px"
+               Draggable="false"
                Modal="true"
                Visible="@IsVisible"
+               Resizable="false"
                VisibleChanged="@OnVisibleChanged">
 
-    @* Window title showing search term *@
+    @* Window title area / header
+       - Visual styling lives in `.k-window-titlebar` and `.search-results-header`.
+       - Change background / text colors there. *@
     <WindowTitle>
-        <strong>Search Results</strong>
-        @if (!string.IsNullOrEmpty(SearchResults?.SearchTerm))
-        {
-            <span class="search-term">for "@SearchResults.SearchTerm"</span>
-        }
+        <div class="search-results-header k-d-flex k-align-items-center k-gap-2 ">
+            <strong>Search Results</strong>
+
+            @* Inline search term display.
+               - Style via `.search-term` to change text color/italic/spacing. *@
+            @if (!string.IsNullOrEmpty(SearchResults?.SearchTerm))
+            {
+                <span class="search-term k-text-subtle">for "@SearchResults.SearchTerm"</span>
+            }
+        </div>
     </WindowTitle>
 
+    @* Main scrollable content area
+       - `.search-results-container` holds either loader / tabs / no-results.
+       - Adjust container background / padding / height here. *@
     <WindowContent>
-        <div class="search-results-container">
-            @* Loading state *@
+        <div class="search-results-container k-h-full">
+            @* Loading indicator block
+               - Uses TelerikLoader; change loader appearance with ThemeConstants or Kendo CSS variables. *@
             @if (IsSearching)
             {
-                <div class="text-center p-4">
+                <div class="k-d-flex k-flex-col k-align-items-center k-justify-content-center k-gap-4 k-p-8">
                     <TelerikLoader Visible="true" Size="@ThemeConstants.Loader.Size.Medium" />
-                    <p>Searching...</p>
+                    <p class="k-text-center k-text-subtle">Searching...</p>
                 </div>
             }
-            @* Results state with tabbed interface *@
+            @* Results present: tabbed interface
+               - `TelerikTabStrip` and `.k-tabstrip` CSS control the tab visuals.
+               - To change active tab color, target selectors like `.k-tabstrip .k-tabstrip-items-wrapper .k-item.k-selected` etc. *@
             else if (SearchResults?.HasResults == true)
             {
-                <TelerikTabStrip Width="325px" TabAlignment="TabStripTabAlignment.Stretched">
+                <TelerikTabStrip Width="95%" TabAlignment="TabStripTabAlignment.Stretched" PersistTabContent="true" Class="search-tabstrip" >
 
-                    @* Employees tab *@
-                    @if (SearchResults.Employees.Any())
-                    {
-                        <TabStripTab Title="@($"Employees ({SearchResults.Employees.Count})")">
-                            <div class="results-section">
-                                @foreach (var employee in SearchResults.Employees)
-                                {
-                                    <div class="result-item employee-item" @onclick="() => NavigateToEmployee(employee.Id)">
-                                        <div class="result-header">
-                                            <strong>@employee.FirstName @employee.LastName</strong>
-                                            <span class="job-title">@employee.JobTitle</span>
-                                        </div>
-                                        <div class="result-details">
-                                            <div><TelerikSvgIcon Icon="@SvgIcon.ExclamationCircle" /> @employee.PhoneNumber</div>
-                                            @if (!string.IsNullOrEmpty(employee.CellNumber))
-                                            {
-                                                <div><TelerikSvgIcon Icon="@SvgIcon.ExclamationCircle" /> @employee.CellNumber</div>
-                                            }
-                                            <div><TelerikSvgIcon Icon="@SvgIcon.ExclamationCircle" /> @employee.Email</div>
-                                            @if (employee.EmpLocation != null)
-                                            {
-                                                <div><TelerikSvgIcon Icon="@SvgIcon.MapMarker" /> @employee.EmpLocation.LocName</div>
-                                            }
-                                            @if (employee.EmpDepartment != null)
-                                            {
-                                                <div><TelerikSvgIcon Icon="@SvgIcon.Group" /> @employee.EmpDepartment.DeptName</div>
-                                            }
-                                        </div>
+                    @* Employees tab
+                       - Each employee item uses `.result-item` and `.employee-item`.
+                       - Change hover, border, and typography in the CSS section below. *@
+                    <TabStripTab Title="@($"Employees ({SearchResults.Employees.Count})")" Class="tab-header" >
+                        <div class="results-section k-overflow-y-auto k-h-full">
+                            @foreach (var employee in SearchResults.Employees)
+                            {
+                                @* Single result row
+                                   - `.result-header` contains main title and metadata.
+                                   - `.job-title` / small text styles located in CSS. *@
+                                <div class="result-item k-p-4 k-cursor-pointer k-border-b k-border-b-solid k-border-border" @onclick="() => NavigateToEmployee(employee.Id)">
+                                    <div class="k-d-flex k-flex-col k-gap-2">
+                                        <div class="k-font-weight-semibold k-text-primary">@employee.FirstName @employee.LastName</div>
+                                        <div class="k-text-subtle k-font-size-md">@employee.JobTitle</div>
+                                        <div class="k-text-subtle k-font-size-md">@employee.EmpDepartment?.DeptName</div>
                                     </div>
-                                }
-                            </div>
-                        </TabStripTab>
-                    }
+                                </div>
+                            }
+                        </div>
+                    </TabStripTab>
 
-                    @* Locations tab *@
-                    @if (SearchResults.Locations.Any())
-                    {
-                        <TabStripTab Title="@($"Locations ({SearchResults.Locations.Count})")">
-                            <div class="results-section">
-                                @foreach (var location in SearchResults.Locations)
-                                {
-                                    <div class="result-item location-item" @onclick="() => NavigateToLocation(location.Id)">
-                                        <div class="result-header">
-                                            <strong>@location.LocName</strong>
-                                            <span class="location-number">Location #@location.LocNum</span>
-                                        </div>
-                                        <div class="result-details">
-                                            <div><TelerikSvgIcon Icon="@SvgIcon.MapMarker" /> @location.Address, @location.City, @location.State @location.Zipcode</div>
-                                            @if (!string.IsNullOrEmpty(location.PhoneNumber))
-                                            {
-                                                <div><TelerikSvgIcon Icon="@SvgIcon.ExclamationCircle" /> @location.PhoneNumber</div>
-                                            }
-                                            @if (!string.IsNullOrEmpty(location.Email))
-                                            {
-                                                <div><TelerikSvgIcon Icon="@SvgIcon.ExclamationCircle" /> @location.Email</div>
-                                            }
-                                            @if (!string.IsNullOrEmpty(location.StoreManager))
-                                            {
-                                                <div><TelerikSvgIcon Icon="@SvgIcon.User" /> Manager: @location.StoreManager</div>
-                                            }
-                                        </div>
+                    @* Departments tab
+                       - Department list items use `.department-item`.
+                       - To change the accent for departments, update `.department-item:hover` in CSS. *@
+                    <TabStripTab Title="@($"Departments ({SearchResults.Departments.Count})")" Class="tab-header">
+                        <div class="results-section k-overflow-y-auto k-h-full">
+                            @foreach (var department in SearchResults.Departments)
+                            {
+                                <div class="result-item k-p-4 k-cursor-pointer k-border-b k-border-b-solid k-border-border" @onclick="() => NavigateToDepartment(department.Id)">
+                                    <div class="k-d-flex k-flex-col k-gap-2">
+                                        <div class="k-font-weight-semibold k-text-primary">@department.DeptName</div>
+                                        <div class="k-text-subtle k-font-size-sm">@department.DeptLocation.LocName</div>
                                     </div>
-                                }
-                            </div>
-                        </TabStripTab>
-                    }
+                                </div>
+                            }
+                        </div>
+                    </TabStripTab>
 
-                    @* Departments tab *@
-                    @if (SearchResults.Departments.Any())
-                    {
-                        <TabStripTab Title="@($"Departments ({SearchResults.Departments.Count})")">
-                            <div class="results-section">
-                                @foreach (var department in SearchResults.Departments)
-                                {
-                                    <div class="result-item department-item" @onclick="() => NavigateToDepartment(department.Id)">
-                                        <div class="result-header">
-                                            <strong>@department.DeptName</strong>
-                                        </div>
-                                        <div class="result-details">
-                                            @if (!string.IsNullOrEmpty(department.DeptManager))
-                                            {
-                                                <div><TelerikSvgIcon Icon="@SvgIcon.User" /> Manager: @department.DeptManager</div>
-                                            }
-                                            @if (!string.IsNullOrEmpty(department.DeptPhone))
-                                            {
-                                                <div><TelerikSvgIcon Icon="@SvgIcon.ExclamationCircle" /> @department.DeptPhone</div>
-                                            }
-                                            @if (!string.IsNullOrEmpty(department.DeptEmail))
-                                            {
-                                                <div><TelerikSvgIcon Icon="@SvgIcon.ExclamationCircle" /> @department.DeptEmail</div>
-                                            }
-                                            @if (department.DeptLocation != null)
-                                            {
-                                                <div><TelerikSvgIcon Icon="@SvgIcon.MapMarker" /> @department.DeptLocation.LocName</div>
-                                            }
-                                        </div>
+                    @* Locations tab
+                       - Location items use `.location-item`.
+                       - Address/secondary text is `.k-text-subtle k-font-size-sm`. *@
+                    <TabStripTab Title="@($"Locations ({SearchResults.Locations.Count})")" Class="tab-header">
+                        <div class="results-section k-overflow-y-auto k-h-full">
+                            @foreach (var location in SearchResults.Locations)
+                            {
+                                <div class="result-item k-p-4 k-cursor-pointer k-border-b k-border-b-solid k-border-border" @onclick="() => NavigateToLocation(location.Id)">
+                                    <div class="k-d-flex k-flex-col k-gap-2">
+                                        <div class="k-font-weight-semibold k-text-primary">@location.LocName</div>
+                                        <div class="k-text-subtle k-font-size-sm">@location.City</div>
                                     </div>
-                                }
-                            </div>
-                        </TabStripTab>
-                    }
+                                </div>
+                            }
+                        </div>
+                    </TabStripTab>
                 </TelerikTabStrip>
             }
-            @* No results state *@
-            else if (!IsSearching && !string.IsNullOrEmpty(SearchResults?.SearchTerm))
+            @* Empty / no-results UI
+               - `.no-results` controls the empty-state visuals. *@
+            else
             {
-                <div class="no-results text-center p-4">
-                    <TelerikSvgIcon Icon="@SvgIcon.Search" Size="@ThemeConstants.SvgIcon.Size.ExtraLarge" />
-                    <h4>No results found</h4>
-                    <p>Try searching for:</p>
-                    <ul class="search-suggestions">
-                        <li>Employee names (first or last)</li>
-                        <li>Job titles</li>
-                        <li>Phone numbers</li>
-                        <li>Location names or numbers</li>
-                        <li>Department names</li>
-                        <li>Addresses or cities</li>
-                    </ul>
+                <div class="k-d-flex k-flex-col k-align-items-center k-justify-content-center k-gap-4 k-p-8 k-h-full">
+                    <div class="k-text-center k-text-subtle k-font-size-lg">No results found</div>
+                    <div class="k-text-center k-text-subtle k-font-size-sm">Try adjusting your search terms</div>
                 </div>
             }
         </div>
     </WindowContent>
 
+    @* Window actions area (footer actions)
+       - Close button is a `WindowAction` which triggers `CloseModal`.
+       - Styling for actions typically lives in `.k-window-actions` / Kendo variables. *@
     <WindowActions>
         <WindowAction Name="Close" OnClick="@CloseModal" />
     </WindowActions>
 </TelerikWindow>
 
 @code {
-    // Controls modal visibility
+    // Parameters / state (no UI comments needed here)
     [Parameter]
     public bool IsVisible { get; set; }
 
-    // Event callback for visibility changes
     [Parameter]
     public EventCallback<bool> IsVisibleChanged { get; set; }
 
-    // Search term to execute when modal becomes visible
     [Parameter]
     public string SearchTerm { get; set; } = "";
 
-    // Current search results from SearchService
     private SearchResults? SearchResults { get; set; }
-
-    // Indicates search operation in progress
     private bool IsSearching { get; set; }
 
-    // Trigger search when modal becomes visible with new search term
+
+    // private void NavigateToEmployee(int id)
+    // {
+    //     Console.WriteLine($"Navigate to employee: {id}");
+    //     IsVisible = false;
+    // }
+
+    // private void NavigateToDepartment(int id)
+    // {
+    //     Console.WriteLine($"Navigate to department: {id}");
+    //     IsVisible = false;
+    // }
+
+    // private void NavigateToLocation(int id)
+    // {
+    //     Console.WriteLine($"Navigate to location: {id}");
+    //     IsVisible = false;
+    // }
+
+    public class EmployeeResult
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Position { get; set; }
+        public string Department { get; set; }
+    }
+
+    public class DepartmentResult
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int EmployeeCount { get; set; }
+    }
+
+    public class LocationResult
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Address { get; set; }
+    }
+
+    // Search lifecycle / service integration
     protected override async Task OnParametersSetAsync()
     {
         if (IsVisible && !string.IsNullOrWhiteSpace(SearchTerm) &&
@@ -195,7 +200,6 @@
         }
     }
 
-    // Execute search across employees, locations, and departments
     private async Task PerformSearch()
     {
         IsSearching = true;
@@ -217,13 +221,11 @@
         }
     }
 
-    // Handle visibility changes from Telerik Window
     private async Task OnVisibleChanged(bool isVisible)
     {
         await IsVisibleChanged.InvokeAsync(isVisible);
     }
 
-    // Close modal and notify parent
     private async Task CloseModal()
     {
         await IsVisibleChanged.InvokeAsync(false);
@@ -301,193 +303,3 @@
         }
     }
 }
-
-<style>
-    .search-modal {
-        padding: 0;
-        align-self: center;
-        z-index: 999;
-        border-radius: 8px;
-        background-color: var(--kendo-color-base-active);
-    }
-
-    .k-window-content {
-        background-color: var(--kendo-color-base-active);
-        border-radius: 8px;
-    }
-
-    .k-window {
-        width: 90vw;
-        height: 75vh;
-        min-height: 200px;
-        min-width: 120px;
-        z-index: 10003;
-        border-radius: 8px;
-    }
-
-    .k-tabstrip .k-tabstrip-items-wrapper .k-item .k-active,
-    .k-tabstrip .k-tabstrip-items-wrapper .k-item .k-link .k-active,
-    .k-tabstrip .k-tabstrip-items-wrapper .k-item.k-selected {
-        background-color: var(--kendo-color-primary) !important;
-        color: var(--kendo-color-on-primary) !important;
-        padding-bottom: 5px;
-        width: -webkit-fit-content;
-        height: -webkit-fit-content;
-        position: relative;
-    }
-
-    .k-tabstrip .k-tabstrip-items-wrapper .k-item.k-tabstrip-item.k-active {
-        background-color: var(--kendo-color-primary) !important;
-        color: var(--kendo-color-on-primary) !important;
-    }
-
-    .k-tabstrip .k-tabstrip-items-wrapper .k-item:hover {
-        background-color: var(--kendo-color-primary-hover);
-        color: var(--kendo-color-on-primary);
-    }
-
-    .k-tabstrip .k-tabstrip-content {
-        background-color: var(--kendo-color-base-active);
-        padding-bottom: 5px;
-        width: -webkit-fit-content;
-        height: -webkit-fit-content;
-        position: relative;
-    }
-
-    .k-tabstrip-content {
-        background-color: var(--kendo-color-base-active);
-        padding-bottom: 5px;
-    }
-
-        .k-tabstrip-content:active {
-            background-color: var(--kendo-color-base-active);
-            padding-bottom: 5px;
-        }
-
-    .search-term {
-        color: #666;
-        font-weight: normal;
-        font-style: italic;
-        padding: 0 5px;
-    }
-
-    .search-results-container {
-        height: 100%;
-        overflow: hidden;
-    }
-
-    .k-window-titlebar {
-        border-radius: 8px 8px 0 0;
-        background-color: var(--kendo-color-primary-emphasis);
-        color: var(--kendo-color-on-app-surface);
-    }
-
-    .results-section {
-        max-height: 350px;
-        padding: 5px;
-    }
-
-    .result-item {
-        border: 1px solid #e0e0e0;
-        border-radius: 10px;
-        padding: 12px;
-        margin-bottom: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        word-break: break-all;
-        background-color: var(--kendo-color-primary-emphasis);
-    }
-
-        .result-item:hover {
-            background-color: var(--kendo-color-primary-hover);
-            border-color: #007acc;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0, 122, 204, 0.15);
-        }
-
-    .result-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-    }
-
-        .result-header strong {
-            color: #333;
-            font-size: 16px;
-            word-break: auto-phrase;
-        }
-
-    .job-title, .location-number {
-        color: #1976d2;
-        padding: 2px 0 8px 0;
-        font-size: 13px;
-        font-weight: 400;
-        word-break: auto-phrase;
-        text-align: end;
-    }
-
-    .result-details {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        font-weight: bold;
-    }
-
-        .result-details div {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .result-details .k-svg-icon {
-            width: 16px;
-            height: 16px;
-            color: #007acc;
-        }
-
-    .employee-item:hover {
-        border-color: #4caf50;
-    }
-
-        .employee-item:hover .job-title {
-            background-color: #e8f5e8;
-            color: #2e7d32;
-        }
-
-    .location-item:hover {
-        border-color: #ff9800;
-    }
-
-        .location-item:hover .location-number {
-            background-color: #fff3e0;
-            color: #f57c00;
-        }
-
-    .department-item:hover {
-        border-color: #9c27b0;
-    }
-
-    .no-results {
-        color: #666;
-    }
-
-        .no-results .k-svg-icon {
-            color: #ccc;
-            margin-bottom: 16px;
-        }
-
-    .search-suggestions {
-        text-align: left;
-        display: inline-block;
-        margin: 0;
-        padding-left: 20px;
-    }
-
-        .search-suggestions li {
-            margin-bottom: 4px;
-            color: #888;
-        }
-</style>

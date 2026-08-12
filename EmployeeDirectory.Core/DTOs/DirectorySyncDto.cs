@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EmployeeDirectory.Core.DTOs
+﻿namespace EmployeeDirectory.Core.DTOs
 {
     /// Container for full directory sync response from API
     public class DirectorySyncDto

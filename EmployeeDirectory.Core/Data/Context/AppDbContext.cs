@@ -144,7 +144,7 @@ namespace EmployeeDirectory.Core.Data.Context
                 entity.Property(e => e.StoreManager).HasMaxLength(60);
 
                 // Relationship: Location -> Loctype
-               
+
                 entity.Property(e => e.Loctype)
                     .HasConversion<int>()
                     .IsRequired();

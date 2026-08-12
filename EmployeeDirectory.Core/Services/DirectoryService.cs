@@ -2,7 +2,6 @@
 using EmployeeDirectory.Core.DTOs;
 using EmployeeDirectory.Core.Enums;
 using EmployeeDirectory.Core.Extensions;
-using EmployeeDirectory.Core.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace EmployeeDirectory.Core.Services;

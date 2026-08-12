@@ -1,6 +1,7 @@
 using Aspire.Hosting.Docker.Resources.ComposeNodes;
 using Aspire.Hosting.Yarp;
 using Aspire.Hosting.Yarp.Transforms;
+using Microsoft.Extensions.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -15,6 +16,8 @@ builder.AddDockerComposeEnvironment("employeedirectory-env")
             .PublishAsDockerComposeService((resource, service) => { service.Name = "ed-env"; })
             .WithForwardedHeaders(enabled: true);
     });
+
+
 
 // ===== PRIVATE REGISTRY =====
 #pragma warning disable ASPIRECOMPUTE003, ASPIREPIPELINES003
@@ -117,6 +120,20 @@ builder.AddYarp("ed-gateway")
             ["ed-admin"] = new ServiceDependency { Condition = "service_started" }
         };
     });
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.AddProject<Projects.EmployeeDirectory_WPF>("ed-desktop")
+    .WithReference(edapi)
+    .WithReference(employeeDirectoryDb)
+    .WithReference(redis)
+    .WithEnvironment("AppSettings__ApiBaseUrl", "http://ed-gateway")
+    .WithEnvironment("AppSettings__PasswordHash", builder.AddParameter("admin-password-hash", secret: true))
+    .WaitFor(edapi)
+    .WaitFor(admin)
+    .WaitFor(redis)
+    .WaitFor(employeeDirectoryDb);
+}
 
 //Dekstop Start
 

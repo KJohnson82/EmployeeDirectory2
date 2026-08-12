@@ -3,9 +3,7 @@ using EmployeeDirectory.Admin.Services;
 using EmployeeDirectory.Core.Data.Context;
 using EmployeeDirectory.Core.Services;
 using EmployeeDirectory.ServiceDefaults;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,12 +13,12 @@ builder.AddServiceDefaults();
 
 builder.AddNpgsqlDbContext<AppDbContext>("employeedirectory-db", configureDbContextOptions: options =>
 {
-    #if DEBUG
+#if DEBUG
     options.EnableSensitiveDataLogging();
     options.EnableDetailedErrors();
     options.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
 #endif
-    });
+});
 
 builder.Services.AddDbContextFactory<AppDbContext>(lifetime: ServiceLifetime.Scoped);
 

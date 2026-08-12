@@ -1,5 +1,4 @@
 ﻿using EmployeeDirectory.Desktop.Interfaces;
-using EmployeeDirectory.Desktop.Services;
 
 namespace EmployeeDirectory.Desktop;
 

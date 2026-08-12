@@ -1,5 +1,4 @@
-﻿using System;
-using Telerik.SvgIcons;
+﻿using Telerik.SvgIcons;
 
 //namespace MMDirectory.Layout
 //{

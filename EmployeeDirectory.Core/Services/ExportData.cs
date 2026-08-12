@@ -7,7 +7,7 @@
 
 //namespace EmployeeDirectory.Core.Services
 //{
-    
+
 //    /// Handles fetching and exporting of location, department, and employee data.
 //    /// This class provides methods to query the database for different location types
 //    /// and export the aggregated data to a JSON file.
@@ -103,33 +103,33 @@
 
 //        #region Wrapper Methods for FetchLocationsByTypeAsync
 
-        
+
 //        /// Fetches corporate location data by calling the generic fetch method.
-        
+
 //        public async Task<Dictionary<string, List<Location>>> FetchCorpDataAsync() =>
 //            await FetchLocationsByTypeAsync(LocationType.Corporate);
 
-        
+
 //        /// Fetches manufacturing plant location data by calling the generic fetch method.
-        
+
 //        public async Task<Dictionary<string, List<Location>>> FetchPlantDataAsync() =>
 //            await FetchLocationsByTypeAsync(LocationType.Plant);
 
-        
+
 //        /// Fetches Metal Mart location data by calling the generic fetch method.
-        
+
 //        public async Task<Dictionary<string, List<Location>>> FetchMMDataAsync() =>
 //            await FetchLocationsByTypeAsync(LocationType.MetalMart);
 
-        
+
 //        /// Fetches Service Center location data by calling the generic fetch method.
-        
+
 //        public async Task<Dictionary<string, List<Location>>> FetchSCDataAsync() =>
 //            await FetchLocationsByTypeAsync(LocationType.ServiceCenter);
 
 //        #endregion
 
-        
+
 //        /// Generates a comprehensive JSON object containing data for all location types.
 //        /// It executes all data fetch operations in parallel to improve performance.
 //        /// <returns>A dictionary representing the final JSON structure with all location data.</returns>
@@ -161,7 +161,7 @@
 //            };
 //        }
 
-        
+
 //        /// Exports the generated directory data to a timestamped JSON file.
 //        /// The file is saved to a specified directory or a default 'EMP_Data' folder in the user's Documents.
 //        /// <param name="outputDirectory">Optional. The full path of the directory to save the file in. If null, a default path is used.</param>
