@@ -374,3 +374,14 @@ FodyWeavers.xsd
 /EmployeeDirectory.Desktop/MMEDInnoScript.iss
 /EmployeeDirectory.UI/wwwroot/fonts/OpenSans-VariableFont_wdthwght.ttf
 /.github/copilot-instructions.md
+dist/
+.aspire/
+/.agents/skills
+/EmployeeDirectory.Admin_Backup_2026.08.12_11.14.53
+/EmployeeDirectory.Desktop/Component1.razor
+/EmployeeDirectory.Desktop_Backup_2026.08.12_11.14.50
+/EmployeeDirectory.UI_Backup_2026.08.12_11.14.50
+/.mcp.json
+/apphost.mts
+*.json
+/EmployeeDirectory_Report_2026.08.12_11.14.54.htm

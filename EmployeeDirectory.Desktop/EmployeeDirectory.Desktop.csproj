@@ -20,7 +20,7 @@
     <AssemblyName>MMDirectory</AssemblyName>
   </PropertyGroup>
   <PropertyGroup>
-    <WindowsPackageType Condition="'$(WindowsPackageType)' == ''">MSIX</WindowsPackageType>
+    <!--<WindowsPackageType Condition="'$(WindowsPackageType)' == ''">MSIX</WindowsPackageType>-->
     <EnableMsixTooling Condition="'$(WindowsPackageType)' == 'None'">false</EnableMsixTooling>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net10.0-windows10.0.19041.0|AnyCPU'">
